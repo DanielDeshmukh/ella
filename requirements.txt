@@ -1,0 +1,16 @@
+# AI & Orchestration
+langchain
+langchain-openai
+langgraph
+qdrant-client
+sentence-transformers
+
+# API & Interface
+fastapi
+uvicorn
+typer
+python-dotenv
+
+# Utilities
+pydantic
+rich
