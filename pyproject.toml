@@ -41,7 +41,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ella = "src.cli:app"
+ella = "src.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["src*"]

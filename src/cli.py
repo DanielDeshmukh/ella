@@ -20,6 +20,7 @@ app = typer.Typer(
     name="ella",
     help="Medical Triage & Clinical RAG Engine",
     add_completion=False,
+    no_args_is_help=False,
 )
 console = Console()
 
@@ -113,42 +114,10 @@ def chat():
             console.print(f"[red]System Error: {e}[/red]")
 
 
-@app.command()
-def eval():
-    """Run the 50-query evaluation benchmark."""
-    console.print("[bold]Running Ella Evaluation Benchmark...[/bold]\n")
-    os.system(f"{sys.executable} -m src.evaluation")
-
-
-@app.command()
-def stats():
-    """Show Pinecone index statistics."""
-    from pinecone import Pinecone
-
-    api_key = os.getenv("PINECONE_API_KEY")
-    if not api_key:
-        console.print("[red]PINECONE_API_KEY not found in .env[/red]")
-        raise typer.Exit()
-
-    pc = Pinecone(api_key=api_key)
-    index = pc.Index("ella-medical")
-    stats_data = index.describe_index_stats()
-
-    console.print(Panel(
-        f"[bold]Pinecone Index: ella-medical[/bold]\n\n"
-        f"Total Vectors: [green]{stats_data.total_vector_count}[/green]\n"
-        f"Namespaces:\n" +
-        "\n".join([f"  [dim]{ns}:[/dim] {data.vector_count} vectors" for ns, data in stats_data.namespaces.items()]),
-        border_style="blue"
-    ))
-
-
-@app.command()
-def version():
-    """Show Ella version."""
-    console.print("[bold white]Ella Core v1.1.0[/bold white]")
-    console.print("[dim]Medical Triage & Clinical RAG Engine[/dim]")
+def main():
+    """Entry point: `ella` launches the triage session."""
+    chat()
 
 
 if __name__ == "__main__":
-    app()
+    main()
