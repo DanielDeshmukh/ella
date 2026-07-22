@@ -63,15 +63,15 @@ class Ella:
             api_name="/process_query_gpu",
         )
 
-        # result is a tuple: (thought_process, intent, context, cleared_input)
+        # result is a tuple: (response, intent, thought_process, context, cleared_input)
         data = result if isinstance(result, (list, tuple)) else [result]
 
-        # API returns: (thought_process, intent, context, cleared_input)
-        thought_process = data[0] if len(data) > 0 else ""
+        response_text = data[0] if len(data) > 0 else ""
         intent_raw = data[1] if len(data) > 1 else ""
-        context = data[2] if len(data) > 2 else ""
+        thought_process = data[2] if len(data) > 2 else ""
+        context = data[3] if len(data) > 3 else ""
 
-        # Parse "TRIAGE (high)" into intent and priority
+        # Parse "TRIAGE (P2)" into intent and priority
         intent = intent_raw
         priority = ""
         if "(" in intent_raw and ")" in intent_raw:
@@ -83,7 +83,7 @@ class Ella:
             priority=priority,
             thought_process=thought_process,
             justification="",
-            response=thought_process,
+            response=response_text,
             retrieved_context=context,
         )
 

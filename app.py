@@ -37,7 +37,7 @@ def process_query_gpu(user_input, history):
 
 def process_query(user_input, history):
     if not user_input.strip():
-        return history, "", "", "", ""
+        return history, "", "", "", "", ""
 
     router = initialize_ella()
     history_str = "\n".join([f"{m['role']}: {m['content']}" for m in history[-3:]])
@@ -45,7 +45,7 @@ def process_query(user_input, history):
     try:
         decision = router.route_request(user_input, history=history_str)
     except Exception as e:
-        return history, f"Error: {e}", "", "", ""
+        return history, "", f"Error: {e}", "", "", ""
 
     context = getattr(decision, "retrieved_context", "")
 
@@ -73,11 +73,11 @@ def process_query(user_input, history):
     history.append({"role": "Patient", "content": user_input})
     history.append({"role": "Ella", "content": output})
 
-    return history, f"{decision.intent} ({decision.priority})", decision.thought_process, context_display, ""
+    return history, output, f"{decision.intent} ({decision.priority})", decision.thought_process, context_display, ""
 
 
 def clear_all():
-    return [], "", "", "", ""
+    return [], "", "", "", "", ""
 
 
 css = """
@@ -408,6 +408,9 @@ with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Bas
             gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Intent</span></div>')
             intent_output = gr.Textbox(show_label=False, interactive=False, elem_classes=["pipeline-value"])
 
+            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Response</span></div>')
+            response_output = gr.Textbox(show_label=False, interactive=False, lines=4, elem_classes=["pipeline-value"])
+
             gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Thought Process</span></div>')
             thought_output = gr.Textbox(show_label=False, interactive=False, lines=3, elem_classes=["pipeline-value"])
 
@@ -439,7 +442,7 @@ with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Bas
     submit_btn.click(
         process_query_gpu,
         inputs=[user_input, history_state],
-        outputs=[history_state, intent_output, thought_output, context_output, user_input],
+        outputs=[history_state, response_output, intent_output, thought_output, context_output, user_input],
     ).then(
         update_chat, inputs=[history_state], outputs=[chat_display]
     )
@@ -447,14 +450,14 @@ with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Bas
     user_input.submit(
         process_query_gpu,
         inputs=[user_input, history_state],
-        outputs=[history_state, intent_output, thought_output, context_output, user_input],
+        outputs=[history_state, response_output, intent_output, thought_output, context_output, user_input],
     ).then(
         update_chat, inputs=[history_state], outputs=[chat_display]
     )
 
     clear_btn.click(
         clear_all,
-        outputs=[history_state, chat_display, intent_output, thought_output, context_output],
+        outputs=[history_state, chat_display, response_output, intent_output, thought_output, context_output],
     )
 
 
