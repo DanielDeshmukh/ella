@@ -1,11 +1,10 @@
 """Ella Medical SDK — Client for Medical Triage & Clinical RAG Engine."""
 
 from typing import Optional
-import httpx
 
 from ella_medical.models import QueryResponse
 
-DEFAULT_BASE_URL = "https://daniel2503-ella-medical.hf.space"
+DEFAULT_SPACE = "Daniel2503/ella-medical"
 
 
 class Ella:
@@ -29,21 +28,21 @@ class Ella:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        base_url: str = DEFAULT_BASE_URL,
-        timeout: float = 60.0,
+        space: str = DEFAULT_SPACE,
+        base_url: Optional[str] = None,
+        timeout: float = 120.0,
     ):
         """Initialize Ella client.
 
         Args:
-            api_key: Optional API key (not required for hosted version).
-            base_url: Base URL of the Ella API. Defaults to HuggingFace Space.
+            api_key: Optional HuggingFace API key (not required for public spaces).
+            space: HuggingFace Space ID. Defaults to "Daniel2503/ella-medical".
+            base_url: Reserved for future self-hosted use.
             timeout: Request timeout in seconds.
         """
-        self.base_url = base_url.rstrip("/")
-        self.api_key = api_key
-        self.timeout = timeout
-        self._client = httpx.Client(timeout=timeout)
-        self._history: list[dict] = []
+        from gradio_client import Client
+
+        self._client = Client(space, hf_token=api_key)
 
     def query(
         self,
@@ -59,33 +58,29 @@ class Ella:
         Returns:
             QueryResponse with intent, priority, thought process, and response.
         """
-        payload = {
-            "data": [
-                message,
-                history or "",
-            ]
-        }
-
-        headers = {}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
-
-        response = self._client.post(
-            f"{self.base_url}/api/predict",
-            json=payload,
-            headers=headers,
+        result = self._client.predict(
+            user_input=message,
+            history=history or "",
+            api_name="/process_query_gpu",
         )
-        response.raise_for_status()
 
-        result = response.json()
-        data = result.get("data", [])
+        # result is a tuple: (history, intent, thought_process, context, cleared_input)
+        data = result if isinstance(result, (list, tuple)) else [result]
+
+        intent_raw = data[1] if len(data) > 1 else ""
+        # Parse "TRIAGE (high)" into intent and priority
+        intent = intent_raw
+        priority = ""
+        if "(" in intent_raw and ")" in intent_raw:
+            intent = intent_raw.split("(")[0].strip()
+            priority = intent_raw.split("(")[1].rstrip(")")
 
         return QueryResponse(
-            intent=data[1] if len(data) > 1 else "",
-            priority=data[1] if len(data) > 1 else "",
+            intent=intent,
+            priority=priority,
             thought_process=data[2] if len(data) > 2 else "",
             justification="",
-            response="",
+            response=data[2] if len(data) > 2 else "",
             retrieved_context=data[3] if len(data) > 3 else "",
         )
 
@@ -101,8 +96,8 @@ class Ella:
         return self.query(symptoms)
 
     def close(self):
-        """Close the HTTP client."""
-        self._client.close()
+        """Close the client."""
+        pass
 
     def __enter__(self):
         return self

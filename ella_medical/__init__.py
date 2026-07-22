@@ -1,6 +1,6 @@
 """Ella Medical — Python SDK for Medical Triage & Clinical RAG"""
 
-__version__ = "1.1.2"
+__version__ = "1.1.4"
 
 from ella_medical.client import Ella
 from ella_medical.models import QueryResponse
