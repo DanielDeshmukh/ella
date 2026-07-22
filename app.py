@@ -110,8 +110,15 @@ css = """
 .gradio-container {
     background: var(--bg-primary) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    max-width: 1100px !important;
+    max-width: 100% !important;
+    width: 100% !important;
     color: var(--text-primary) !important;
+    padding: 0 40px !important;
+}
+
+.gradio-container .wrap {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
 }
 
 /* Header */
