@@ -1,3 +1,5 @@
+> ⭐ If Ella's RAG-based medical triage architecture gave you ideas — a star helps other health-AI builders find it. Takes 2 seconds.
+
 # Ella: Agentic Core for Qure
 
 Ella is a high-performance medical orchestration engine designed to bridge the gap between patient inquiries and clinical action. Operating as a sophisticated Reasoning and Extraction (RAG) agent, Ella processes unstructured natural language to perform clinical triage, intent classification, and medical knowledge retrieval.
