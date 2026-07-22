@@ -179,8 +179,88 @@ Ella ships with a single command entry point:
 # Install
 pip install -e .
 
-# Run
+# Interactive triage session
 ella
+
+# Start API server (localhost:8000)
+ella serve
+```
+
+---
+
+## Use via API
+
+Ella exposes a REST API through HuggingFace Spaces. Three ways to connect:
+
+### Python — `gradio_client`
+
+```bash
+pip install gradio_client
+```
+
+```python
+from gradio_client import Client
+
+client = Client("Daniel2503/ella-medical")
+
+result = client.predict(
+    user_input="What are the symptoms of a heart attack?",
+    history="[]",
+    api_name="/process_query_gpu",
+)
+
+print(result)
+# Returns: [history, intent, thought_process, context, ""]
+```
+
+### Python — `requests`
+
+```python
+import requests
+
+API_URL = "https://daniel2503-ella-medical.hf.space/api/predict"
+
+payload = {
+    "data": [
+        "What are the symptoms of a heart attack?",
+        []
+    ]
+}
+
+response = requests.post(API_URL, json=payload)
+print(response.json())
+```
+
+### cURL
+
+```bash
+curl -X POST https://daniel2503-ella-medical.hf.space/api/predict \
+  -H "Content-Type: application/json" \
+  -d '{"data": ["What are the symptoms of a heart attack?", []]}'
+```
+
+### Local API Server
+
+```bash
+# Start the FastAPI server
+ella serve
+
+# OpenAPI docs at http://localhost:8000/docs
+# Query endpoint: POST /query
+```
+
+```python
+import requests
+
+response = requests.post("http://localhost:8000/query", json={
+    "query": "What are the symptoms of a heart attack?",
+    "history": ""
+})
+
+data = response.json()
+print(data["intent"])        # "TRIAGE"
+print(data["response"])     # Grounded clinical response
+print(data["justification"])
 ```
 
 ---
