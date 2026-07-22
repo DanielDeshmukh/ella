@@ -53,18 +53,17 @@ class Ella:
 
         Args:
             message: The patient's message or medical question.
-            history: Optional conversation history string.
+            history: Ignored — Gradio manages state internally.
 
         Returns:
             QueryResponse with intent, priority, thought process, and response.
         """
         result = self._client.predict(
             user_input=message,
-            history=history or "",
             api_name="/process_query_gpu",
         )
 
-        # result is a tuple: (history, intent, thought_process, context, cleared_input)
+        # result is a tuple: (intent, thought_process, context, cleared_input)
         data = result if isinstance(result, (list, tuple)) else [result]
 
         intent_raw = data[1] if len(data) > 1 else ""
