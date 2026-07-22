@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ella-medical"
+version = "1.1.0"
+description = "Medical Triage & Clinical RAG Engine"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Daniel Deshmukh"}
+]
+keywords = ["medical", "triage", "rag", "clinical", "nvidia", "pinecone", "healthcare"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "langchain",
+    "langchain-openai",
+    "langchain-groq",
+    "langchain-ollama",
+    "langchain-pinecone",
+    "langgraph",
+    "sentence-transformers",
+    "pinecone-client",
+    "rank-bm25",
+    "requests",
+    "fastapi",
+    "uvicorn",
+    "typer[all]",
+    "python-dotenv",
+    "pydantic",
+    "rich",
+]
+
+[project.scripts]
+ella = "src.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["src*"]

@@ -20,7 +20,8 @@ It ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them
 [Architecture](#architecture) •
 [Demo](#demo) •
 [Benchmark](#benchmark) •
-[How It Works](#how-it-works)
+[How It Works](#how-it-works) •
+[CLI](#cli)
 
 </div>
 
@@ -163,6 +164,23 @@ Ella maintains conversation history across sessions. If a patient says "yes" aft
 | **Orchestration** | LangChain + LangGraph | Agent pipeline |
 | **Validation** | Pydantic | Schema-validated outputs |
 | **Data** | SQLite + PDFs | 90k clinical text chunks |
+
+---
+
+## CLI
+
+Ella ships with a structured CLI entry point:
+
+```bash
+# Install
+pip install -e .
+
+# Commands
+ella chat        # Start interactive triage session
+ella eval        # Run 50-query benchmark
+ella stats       # Show Pinecone index stats
+ella version     # Show version
+```
 
 ---
 
