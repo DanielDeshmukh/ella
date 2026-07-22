@@ -18,9 +18,9 @@ It ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them
 
 [Key Features](#key-features) •
 [Architecture](#architecture) •
+[Demo](#demo) •
 [Benchmark](#benchmark) •
-[Getting Started](#getting-started) •
-[Roadmap](#roadmap)
+[How It Works](#how-it-works)
 
 </div>
 
@@ -90,6 +90,20 @@ It ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them
 
 ---
 
+## Demo
+
+<div align="center">
+
+[![Ella Demo](https://img.shields.io/badge/WATCH-DEMO-E55B3C?style=for-the-badge&logo=youtube&logoColor=white)](https://github.com/DanielDeshmukh/ella/blob/main/building_medical_intelligence_with_ella_the_hard_r.mp4)
+
+*Building Medical Intelligence with Ella — First LinkedIn Demo*
+
+</div>
+
+> 📹 [Watch the full demo video](building_medical_intelligence_with_ella_the_hard_r.mp4) — See Ella perform real-time medical triage, retrieve clinical context from 90k+ records, and generate grounded responses.
+
+---
+
 ## Benchmark
 
 Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 5 General Info, 5 Closing):
@@ -113,57 +127,28 @@ Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 
 
 ---
 
-## Getting Started
+## How It Works
 
-### Prerequisites
+### 1. Intent Routing
+Every patient message passes through a **State-Aware Router** powered by Groq's `llama-3.1-8b-instant`. The router analyzes both the current input and conversation history, classifying intent into one of five streams: Emergency, Triage, Booking, General Info, or Closing. Outputs are validated via Pydantic schemas to guarantee structured responses.
 
-- Python 3.11+
-- [NVIDIA API Key](https://build.nvidia.com) (free tier available)
-- [Pinecone API Key](https://pinecone.io)
-- [Groq API Key](https://groq.com)
+### 2. Emergency Guardrail
+Before any retrieval occurs, the system checks for life-threatening keywords and patterns. If detected, Ella immediately escalates to emergency protocol — bypassing the standard RAG pipeline to ensure patient safety.
 
-### Installation
+### 3. Hybrid Retrieval
+For clinical queries, Ella executes a **three-stage retrieval pipeline**:
+- **Stage 1 — Semantic Search:** NVIDIA NIM embeddings (`nv-embedqa-e5-v5`) convert the query into a 1024-dimensional vector. Pinecone returns the top-15 candidates via cosine similarity.
+- **Stage 2 — BM25 Reranking:** A keyword-based BM25 algorithm re-scores candidates to capture medical terminology that semantic search might miss.
+- **Stage 3 — CrossEncoder Precision:** A `ms-marco-MiniLM-L-6-v2` cross-encoder reranks the top-10 results, selecting the top-3 most relevant passages.
 
-```bash
-git clone https://github.com/DanielDeshmukh/ella.git
-cd ella
-python -m venv venv
-venv\Scripts\activate        # Windows
-pip install -r requirements.txt
-```
+### 4. Grounded Synthesis
+The LLM receives the patient query alongside the retrieved clinical context. Every response includes:
+- **Clinical justification** — why this information applies
+- **Source attribution** — which medical handbook the data came from
+- **Confidence scoring** — retrieval similarity score for transparency
 
-### Environment Setup
-
-Create a `.env` file:
-
-```env
-GROQ_API_KEY=gsk_xxxxx
-GROQ_MODEL=llama-3.1-8b-instant
-PINECONE_API_KEY=pcsk_xxxxx
-NVIDIA_API_KEY=nvapi_xxxxx
-```
-
-### Data Ingestion
-
-```bash
-# Ingest PDFs into Pinecone
-python -m src.engine.ingest
-
-# Or run migration from old ChromaDB
-python -m src.engine.migrate_chroma_to_pinecone
-```
-
-### Run Evaluation
-
-```bash
-python -m src.evaluation
-```
-
-### Start CLI
-
-```bash
-python -m src.main
-```
+### 5. Multi-Turn State
+Ella maintains conversation history across sessions. If a patient says "yes" after describing symptoms, the router understands the context and continues the triage flow — enabling natural, human-like clinical conversations.
 
 ---
 
@@ -178,40 +163,6 @@ python -m src.main
 | **Orchestration** | LangChain + LangGraph | Agent pipeline |
 | **Validation** | Pydantic | Schema-validated outputs |
 | **Data** | SQLite + PDFs | 90k clinical text chunks |
-
----
-
-## Project Structure
-
-```
-ella/
-├── src/
-│   ├── agents/
-│   │   ├── router.py              # Intent classification (5-class)
-│   │   └── guardrails.py          # Emergency detection
-│   ├── engine/
-│   │   ├── retriever.py           # Pinecone + NIM hybrid search
-│   │   ├── nim_embeddings.py      # NVIDIA NIM API wrapper
-│   │   ├── bm25_retriever.py      # BM25 keyword retrieval
-│   │   ├── ingest.py              # PDF → Pinecone pipeline
-│   │   └── migrate_chroma_to_pinecone.py  # Batch migration
-│   ├── evaluation.py              # 50-query benchmark
-│   └── main.py                    # CLI entry point
-├── requirements.txt
-├── .env                           # API keys (gitignored)
-└── README.md
-```
-
----
-
-## Roadmap
-
-| Phase | Focus | Status |
-|-------|-------|--------|
-| **1–8** | Core RAG, Vector DB, Hybrid Search, Guardrails | ✅ Complete |
-| **9–12** | PostgreSQL backend, Patient records, Memory | 🔜 Planned |
-| **13–16** | Voice (Vapi/Twilio), STT/TTS, <1.5s latency | 🔜 Planned |
-| **17–20** | WhatsApp/SMS, Admin dashboard, HIPAA compliance | 🔜 Planned |
 
 ---
 
