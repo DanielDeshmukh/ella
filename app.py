@@ -37,7 +37,7 @@ def process_query_gpu(user_input, history):
 
 def process_query(user_input, history):
     if not user_input.strip():
-        return history, "", "", "", ""
+        return history, "", "", "", "", ""
 
     router = initialize_ella()
     history_str = "\n".join([f"{m['role']}: {m['content']}" for m in history[-3:]])
@@ -45,7 +45,7 @@ def process_query(user_input, history):
     try:
         decision = router.route_request(user_input, history=history_str)
     except Exception as e:
-        return history, f"Error: {e}", "", "", ""
+        return history, "", f"Error: {e}", "", "", ""
 
     context = getattr(decision, "retrieved_context", "")
 
@@ -73,385 +73,322 @@ def process_query(user_input, history):
     history.append({"role": "Patient", "content": user_input})
     history.append({"role": "Ella", "content": output})
 
-    chat_display = ""
-    for msg in history[-6:]:
-        role = msg["role"]
-        content = msg["content"]
-        chat_display += f"**{role}:** {content}\n\n"
-
-    return history, chat_display, f"{decision.intent} ({decision.priority})", decision.thought_process, output, context_display
+    return history, output, f"{decision.intent} ({decision.priority})", decision.thought_process, output, context_display
 
 
-def clear_history():
-    global chat_history
-    chat_history = []
+def clear_all():
     return [], "", "", "", "", ""
 
 
 css = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-:root {
-    --bg-primary: #0a0e17;
-    --bg-secondary: #111827;
-    --bg-card: #1a2236;
-    --accent: #6366f1;
-    --accent-glow: rgba(99, 102, 241, 0.3);
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --border: #1e293b;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --radius: 12px;
-}
-
 .gradio-container {
-    background: var(--bg-primary) !important;
+    background: #0f1117 !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     max-width: 100% !important;
     width: 100% !important;
-    color: var(--text-primary) !important;
-    padding: 0 40px !important;
+    padding: 0 !important;
 }
 
-.gradio-container .wrap {
-    max-width: 1400px !important;
-    margin: 0 auto !important;
-}
-
-/* Header */
-.header-section {
+.main-title {
     text-align: center;
-    padding: 40px 0 30px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 30px;
+    padding: 48px 0 32px;
 }
 
-.header-section h1 {
-    font-size: 42px !important;
+.main-title h1 {
+    font-size: 48px !important;
     font-weight: 700 !important;
-    letter-spacing: 8px !important;
-    color: var(--text-primary) !important;
-    margin-bottom: 8px !important;
+    letter-spacing: 12px !important;
+    color: #ffffff !important;
+    margin: 0 !important;
     text-transform: uppercase;
 }
 
-.header-section .subtitle {
-    font-size: 16px;
-    color: var(--text-secondary);
+.main-title p {
+    font-size: 15px;
+    color: #64748b;
+    margin-top: 8px;
+    letter-spacing: 3px;
     font-weight: 300;
-    letter-spacing: 2px;
-    margin-bottom: 16px;
 }
 
-.header-section .badges {
+.badges-row {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
+    margin-top: 20px;
     flex-wrap: wrap;
-    margin-top: 16px;
 }
 
-.badge {
-    display: inline-block;
+.badge-item {
     padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.5px;
-    border: 1px solid var(--border);
-    background: var(--bg-card);
-    color: var(--text-secondary);
-}
-
-.badge.accent {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(99, 102, 241, 0.1);
-}
-
-.badge.success {
-    border-color: var(--success);
-    color: var(--success);
-    background: rgba(16, 185, 129, 0.1);
-}
-
-/* Chat Area */
-.chat-area {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    min-height: 400px;
-}
-
-.chat-message {
-    padding: 12px 16px;
-    margin-bottom: 12px;
-    border-radius: var(--radius);
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-.chat-message.patient {
-    background: rgba(99, 102, 241, 0.1);
-    border-left: 3px solid var(--accent);
-    color: var(--text-primary);
-}
-
-.chat-message.ella {
-    background: var(--bg-card);
-    border-left: 3px solid var(--success);
-    color: var(--text-primary);
-}
-
-/* Input Area */
-.input-section {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-top: 16px;
-}
-
-/* Pipeline Output */
-.pipeline-section {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-}
-
-.pipeline-section h3 {
-    color: var(--text-primary) !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
+    border: 1px solid #1e293b;
+    background: transparent;
+    color: #94a3b8;
     text-transform: uppercase;
-    margin-bottom: 20px !important;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
 }
 
-.pipeline-item {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+.badge-item.green {
+    border-color: #10b981;
+    color: #10b981;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #1e293b;
+    margin: 0 60px;
+}
+
+.chat-panel {
+    background: #111318;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 500px;
+}
+
+.chat-msg {
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #e2e8f0;
+}
+
+.chat-msg.patient {
+    background: #1a1d2e;
+    border-left: 3px solid #6366f1;
+}
+
+.chat-msg.ella {
+    background: #111827;
+    border-left: 3px solid #10b981;
+}
+
+.chat-msg strong {
+    color: #f8fafc;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pipeline-panel {
+    background: #111318;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 24px;
+    height: 100%;
+}
+
+.pipeline-panel h3 {
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 24px 0 !important;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #1e293b;
+}
+
+.pipeline-card {
+    background: #1a1d2e;
+    border: 1px solid #1e293b;
     border-radius: 8px;
-    padding: 12px 16px;
+    padding: 16px;
     margin-bottom: 12px;
 }
 
 .pipeline-label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 8px;
+    color: #6366f1;
+    margin-bottom: 10px;
     display: block;
 }
 
 .pipeline-value {
     font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.5;
+    color: #94a3b8;
+    line-height: 1.6;
+    word-wrap: break-word;
 }
 
-/* Buttons */
-.primary-btn {
-    background: var(--accent) !important;
+.input-row {
+    background: #111318;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.input-row textarea {
+    background: #1a1d2e !important;
+    border: 1px solid #1e293b !important;
+    color: #e2e8f0 !important;
+    border-radius: 8px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    padding: 12px 16px !important;
+    flex: 1 !important;
+}
+
+.input-row textarea:focus {
+    border-color: #6366f1 !important;
+    outline: none !important;
+}
+
+.send-btn {
+    background: #6366f1 !important;
     color: white !important;
     border: none !important;
     border-radius: 8px !important;
     font-weight: 500 !important;
+    padding: 12px 28px !important;
+    font-size: 14px !important;
     letter-spacing: 0.5px;
-    padding: 12px 24px !important;
-    transition: all 0.2s !important;
+    min-width: 100px !important;
 }
 
-.primary-btn:hover {
+.send-btn:hover {
     background: #5558e6 !important;
-    box-shadow: 0 0 20px var(--accent-glow) !important;
 }
 
-.secondary-btn {
+.clear-btn {
     background: transparent !important;
-    color: var(--text-secondary) !important;
-    border: 1px solid var(--border) !important;
+    color: #64748b !important;
+    border: 1px solid #1e293b !important;
     border-radius: 8px !important;
     font-weight: 500 !important;
-    padding: 12px 24px !important;
+    padding: 12px 20px !important;
+    font-size: 14px !important;
 }
 
-.secondary-btn:hover {
-    border-color: var(--text-muted) !important;
-    color: var(--text-primary) !important;
+.clear-btn:hover {
+    border-color: #334155 !important;
+    color: #94a3b8 !important;
 }
 
-/* Textbox */
-textarea, input[type="text"] {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--text-primary) !important;
-    border-radius: 8px !important;
-    font-family: 'Inter', sans-serif !important;
-}
-
-textarea:focus, input[type="text"]:focus {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 2px var(--accent-glow) !important;
-    outline: none !important;
-}
-
-/* Footer */
-.footer-section {
+.footer-text {
     text-align: center;
-    padding: 30px 0 20px;
-    border-top: 1px solid var(--border);
-    margin-top: 30px;
-}
-
-.footer-section p {
+    padding: 32px 0 24px;
+    color: #334155;
     font-size: 12px;
-    color: var(--text-muted);
     letter-spacing: 0.5px;
 }
 
-/* Labels */
-label, .label-wrap span {
-    color: var(--text-secondary) !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.5px;
+label {
+    display: none !important;
 }
-
-/* Remove Gradio defaults */
-.gr-block { border: none !important; }
-.gr-form { background: transparent !important; }
-.gr-panel { background: transparent !important; border: none !important; }
 """
 
-# Build UI
 with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Base()) as demo:
     # Header
     gr.HTML("""
-        <div class="header-section">
+        <div class="main-title">
             <h1>ELLA</h1>
-            <p class="subtitle">Medical Triage & Clinical RAG Engine</p>
-            <div class="badges">
-                <span class="badge accent">NVIDIA NIM</span>
-                <span class="badge accent">Pinecone</span>
-                <span class="badge accent">Groq</span>
-                <span class="badge success">90,306 records</span>
-                <span class="badge success">96% accuracy</span>
+            <p>Medical Triage & Clinical RAG Engine</p>
+            <div class="badges-row">
+                <span class="badge-item">NVIDIA NIM</span>
+                <span class="badge-item">Pinecone</span>
+                <span class="badge-item">Groq</span>
+                <span class="badge-item green">90,306 records</span>
+                <span class="badge-item green">96% accuracy</span>
             </div>
         </div>
+        <hr class="divider">
     """)
 
-    with gr.Row():
+    with gr.Row(equal_height=True):
         # Chat Column
         with gr.Column(scale=3):
-            chat_display = gr.HTML("""
-                <div class="chat-area">
-                    <p style="color: var(--text-muted); font-style: italic; text-align: center; padding: 40px;">
-                        Start a conversation by typing your medical question below.
-                    </p>
-                </div>
-            """)
+            chat_display = gr.Markdown(
+                value="*Start a conversation by typing your medical question below.*",
+                elem_classes=["chat-panel"],
+            )
 
-            with gr.Row():
+            with gr.Row(elem_classes=["input-row"]):
                 user_input = gr.Textbox(
                     placeholder="e.g., What are the symptoms of a heart attack?",
                     show_label=False,
                     lines=1,
                     max_lines=3,
+                    scale=4,
                 )
-                submit_btn = gr.Button("Send", variant="primary", scale=0, min_width=100)
-                clear_btn = gr.Button("Clear", variant="secondary", scale=0, min_width=100)
+                submit_btn = gr.Button("Send", elem_classes=["send-btn"], scale=0)
+                clear_btn = gr.Button("Clear", elem_classes=["clear-btn"], scale=0)
 
         # Pipeline Column
         with gr.Column(scale=2):
-            gr.HTML("""
-                <div class="pipeline-section">
-                    <h3>Pipeline Output</h3>
+            gr.HTML('<div class="pipeline-panel"><h3>Pipeline Output</h3>')
 
-                    <div class="pipeline-item">
-                        <span class="pipeline-label">Intent</span>
-                        <div class="pipeline-value" id="intent-val">—</div>
-                    </div>
+            with gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Intent</span>'):
+                intent_output = gr.Textbox(show_label=False, interactive=False, elem_classes=["pipeline-value"])
+            gr.HTML('</div>')
 
-                    <div class="pipeline-item">
-                        <span class="pipeline-label">Thought Process</span>
-                        <div class="pipeline-value" id="thought-val">—</div>
-                    </div>
+            with gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Thought Process</span>'):
+                thought_output = gr.Textbox(show_label=False, interactive=False, lines=3, elem_classes=["pipeline-value"])
+            gr.HTML('</div>')
 
-                    <div class="pipeline-item">
-                        <span class="pipeline-label">Ella's Response</span>
-                        <div class="pipeline-value" id="response-val">—</div>
-                    </div>
+            with gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Retrieved Context</span>'):
+                context_output = gr.Textbox(show_label=False, interactive=False, lines=5, elem_classes=["pipeline-value"])
+            gr.HTML('</div>')
 
-                    <div class="pipeline-item">
-                        <span class="pipeline-label">Retrieved Context</span>
-                        <div class="pipeline-value" id="context-val" style="max-height: 200px; overflow-y: auto;">—</div>
-                    </div>
-                </div>
-            """)
+            gr.HTML('</div>')
 
-            intent_output = gr.Textbox(visible=False)
-            thought_output = gr.Textbox(visible=False)
-            response_output = gr.Textbox(visible=False)
-            context_output = gr.Textbox(visible=False)
-
-    # Footer
     gr.HTML("""
-        <div class="footer-section">
-            <p>Built with NVIDIA NIM Embeddings • Pinecone Vector DB • Groq LLM • CrossEncoder Reranker</p>
-            <p style="margin-top: 4px;">90,306 clinical text chunks • Hybrid retrieval • 96% intent accuracy</p>
+        <div class="footer-text">
+            NVIDIA NIM Embeddings • Pinecone Vector DB • Groq LLM • CrossEncoder Reranker<br>
+            90,306 clinical text chunks • Hybrid retrieval • 96% intent accuracy
         </div>
     """)
 
     # State
     history_state = gr.State([])
 
-    # Update pipeline display function
-    def update_display(history, intent, thought, response, context):
-        chat_html = '<div class="chat-area">'
+    def update_chat(history):
+        if not history:
+            return "*Start a conversation by typing your medical question below.*"
+        html = ""
         for msg in history[-6:]:
             role = msg["role"].lower()
-            chat_html += f'<div class="chat-message {role}"><strong>{msg["role"]}:</strong> {msg["content"]}</div>'
-        chat_html += '</div>'
-
-        return chat_html, intent, thought, response, context
-
-    def clear_all():
-        return [], '<div class="chat-area"><p style="color: var(--text-muted); font-style: italic; text-align: center; padding: 40px;">Start a conversation by typing your medical question below.</p></div>', "", "", "", ""
+            html += f'<div class="chat-msg {role}"><strong>{msg["role"]}</strong>{msg["content"]}</div>'
+        return html
 
     # Events
     submit_btn.click(
         process_query_gpu,
         inputs=[user_input, history_state],
-        outputs=[history_state, intent_output, thought_output, response_output, context_output],
+        outputs=[history_state, chat_display, intent_output, thought_output, context_output],
     ).then(
-        update_display,
-        inputs=[history_state, intent_output, thought_output, response_output, context_output],
-        outputs=[chat_display, intent_output, thought_output, response_output, context_output],
+        update_chat, inputs=[history_state], outputs=[chat_display]
     ).then(lambda: "", outputs=user_input)
 
     user_input.submit(
         process_query_gpu,
         inputs=[user_input, history_state],
-        outputs=[history_state, intent_output, thought_output, response_output, context_output],
+        outputs=[history_state, chat_display, intent_output, thought_output, context_output],
     ).then(
-        update_display,
-        inputs=[history_state, intent_output, thought_output, response_output, context_output],
-        outputs=[chat_display, intent_output, thought_output, response_output, context_output],
+        update_chat, inputs=[history_state], outputs=[chat_display]
     ).then(lambda: "", outputs=user_input)
 
     clear_btn.click(
         clear_all,
-        outputs=[history_state, chat_display, intent_output, thought_output, response_output, context_output],
+        outputs=[history_state, chat_display, intent_output, thought_output, context_output],
     )
 
 
