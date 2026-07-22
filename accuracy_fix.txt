@@ -1,0 +1,129 @@
+﻿Loading NIM Embeddings...
+NIM Embeddings ready
+Loading BM25 Retriever (90k records)...
+Loading cached BM25 index...
+BM25 Retriever ready: 90306 records
+
+Loaded 90306 records
+Loading Reranker...
+python.exe : Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher 
+rate limits and faster downloads.
+At line:1 char:32
++ ... NG="utf-8"; & "D:\Vs Code\VS code\ella\venv\Scripts\python.exe" -m sr ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Warning: You ar...ster downloads.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Loading weights:   0%|          | 0/105 [00:00<?, ?it/s]
+Loading weights: 100%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê| 105/105 [00:00<00:00, 4167.47it/s]
+Reranker ready
+
+  Evaluating queries ---------------------------------------- 50/50 0:07:42
+
+Results saved to D:\Vs Code\VS code\evaluation_results.json
+ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé EVALUATION REPORT                                                           Γöé
+Γöé 2026-07-22T13:07:52.310741                                                  Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé Metric                   Γöé  Value Γöé
+Γö£ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöñ
+Γöé Total Queries            Γöé     50 Γöé
+Γöé Intent Accuracy          Γöé  96.0% Γöé
+Γöé Avg Latency              Γöé 9.258s Γöé
+Γöé Avg Retrieval Score      Γöé   0.92 Γöé
+Γöé Quality: Good            Γöé     48 Γöé
+Γöé Quality: Missing closing Γöé      2 Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+Intent Classification Breakdown:
+ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé Expected     Γöé Detected     Γöé Match Γöé Count Γöé
+Γö£ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöñ
+Γöé BOOKING      Γöé BOOKING      Γöé Γ£ô     Γöé 10    Γöé
+Γöé CLOSING      Γöé CLOSING      Γöé Γ£ô     Γöé 5     Γöé
+Γöé EMERGENCY    Γöé EMERGENCY    Γöé Γ£ô     Γöé 10    Γöé
+Γöé GENERAL_INFO Γöé GENERAL_INFO Γöé Γ£ô     Γöé 5     Γöé
+Γöé TRIAGE       Γöé EMERGENCY    Γöé Γ£ù     Γöé 2     Γöé
+Γöé TRIAGE       Γöé TRIAGE       Γöé Γ£ô     Γöé 18    Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+Failed Intent Classifications (2):
+  Query: I have chest pain when I breathe
+    Expected: TRIAGE, Got: EMERGENCY
+  Query: I've been bleeding for 10 minutes from a cut
+    Expected: TRIAGE, Got: EMERGENCY
+
+Sample Responses:
+
+Q1: What are the symptoms of a heart attack?
+  Intent: TRIAGE (expected: TRIAGE)
+  Response: Hello, I'm Ella, your clinical receptionist. I've retrieved some 
+information from our database to help you understand the symptoms of a heart 
+attack. According to our documents, a heart attack is a li...
+
+Q11: My blood pressure reading was 180/110
+  Intent: TRIAGE (expected: TRIAGE)
+  Response: Hello, I'm Ella, your clinical receptionist. I've taken note of 
+your blood pressure reading, which is 180/110. According to our medical 
+guidelines, this reading falls into the category of stage 2 hype...
+
+Q21: I'm having chest pain and can't breathe
+  Intent: EMERGENCY (expected: EMERGENCY)
+  Response: I'm so sorry to hear that you're experiencing chest pain and 
+difficulty breathing. This can be a very distressing and concerning symptom. 
+
+According to the Complete Guide to Symptoms, Illness, Surger...
+
+Q31: I'd like to book an appointment with a cardiologist
+  Intent: BOOKING (expected: BOOKING)
+  Response: Hello, I'm Ella, the clinical receptionist. I'd be happy to assist 
+you with booking an appointment with a cardiologist. 
+
+Before we proceed, I'd like to acknowledge that it's completely normal to 
+have...
+
+Q41: How can I improve my sleep quality?
+  Intent: GENERAL_INFO (expected: GENERAL_INFO)
+  Response: I'd be happy to help you improve your sleep quality.  Based on our 
+conversation, I'd like to ask you a few questions. 
+
+You mentioned you're looking to improve your sleep quality. Have you noticed 
+any...
+
+Q46: bye
+  Intent: CLOSING (expected: CLOSING)
+  Response: I see you're trying to leave, but before you go, I just want to 
+confirm that you've reviewed your appointment details and any instructions 
+provided by your doctor. If you have any questions or concern...
+
+Q47: goodbye
+  Intent: CLOSING (expected: CLOSING)
+  Response: Goodbye, thank you for visiting our clinic today. I'll make sure to
+update your file accordingly. If you have any further questions or concerns, 
+please don't hesitate to reach out to us. Have a great ...
+
+Q48: thank you, see you later
+  Intent: CLOSING (expected: CLOSING)
+  Response: It was a pleasure assisting you today. Before you go, I just need 
+to confirm that you've received the necessary information regarding your 
+upcoming appointment. 
+
+As per our previous discussion, your ...
+
+Q49: tata, take care
+  Intent: CLOSING (expected: CLOSING)
+  Response: Thank you for your kind words, "tata, take care." I'll make sure to
+pass that along to the medical team. 
+
+Before we proceed, I'd like to review your medical history. However, it seems 
+we don't have a...
+
+Q50: that's all for now, bye bye
+  Intent: CLOSING (expected: CLOSING)
+  Response: Thank you for visiting our clinic today. I've taken note of your 
+input, but I'd like to clarify a few things to ensure we have a complete 
+understanding of your situation. 
+
+Before we proceed, I'd like...
