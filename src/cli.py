@@ -136,5 +136,14 @@ def main():
     launch_ella()
 
 
+@app.command()
+def serve(port: int = 8000):
+    """Start the Ella API server."""
+    import uvicorn
+    console.print(f"[green]Starting Ella API on port {port}...[/green]")
+    console.print(f"[dim]Docs: http://localhost:{port}/docs[/dim]")
+    uvicorn.run("src.api:app", host="0.0.0.0", port=port, reload=False)
+
+
 if __name__ == "__main__":
     main()
