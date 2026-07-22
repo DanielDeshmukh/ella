@@ -37,7 +37,7 @@ def process_query_gpu(user_input, history):
 
 def process_query(user_input, history):
     if not user_input.strip():
-        return history, "", "", "", "", ""
+        return history, "", "", "", ""
 
     router = initialize_ella()
     history_str = "\n".join([f"{m['role']}: {m['content']}" for m in history[-3:]])
@@ -45,7 +45,7 @@ def process_query(user_input, history):
     try:
         decision = router.route_request(user_input, history=history_str)
     except Exception as e:
-        return history, "", f"Error: {e}", "", "", ""
+        return history, f"Error: {e}", "", "", ""
 
     context = getattr(decision, "retrieved_context", "")
 
@@ -73,270 +73,316 @@ def process_query(user_input, history):
     history.append({"role": "Patient", "content": user_input})
     history.append({"role": "Ella", "content": output})
 
-    return history, output, f"{decision.intent} ({decision.priority})", decision.thought_process, output, context_display
+    return history, f"{decision.intent} ({decision.priority})", decision.thought_process, context_display, ""
 
 
 def clear_all():
-    return [], "", "", "", "", ""
+    return [], "", "", "", ""
 
 
 css = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+:root {
+    --bg-base: #0a0d12;
+    --bg-panel: #10141b;
+    --bg-panel-raised: #151a23;
+    --border-subtle: #1e2530;
+    --border-strong: #2a3340;
+    --text-primary: #e8ecf1;
+    --text-secondary: #8993a4;
+    --text-muted: #4b5563;
+    --accent-primary: #2dd4bf;
+    --accent-secondary: #38bdf8;
+    --accent-patient: #38bdf8;
+    --accent-ella: #2dd4bf;
+    --accent-danger: #f87171;
+}
+
 .gradio-container {
-    background: #0f1117 !important;
+    background: var(--bg-base) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     max-width: 100% !important;
     width: 100% !important;
     padding: 0 !important;
 }
 
-.main-title {
+.header-bar {
+    padding: 40px 24px 28px;
     text-align: center;
-    padding: 48px 0 32px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: linear-gradient(180deg, var(--bg-panel) 0%, var(--bg-base) 100%);
 }
 
-.main-title h1 {
-    font-size: 48px !important;
-    font-weight: 700 !important;
-    letter-spacing: 12px !important;
-    color: #ffffff !important;
+.header-bar .brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.header-bar .brand-mark {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--accent-primary);
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.6);
+}
+
+.header-bar h1 {
+    font-size: 28px !important;
+    font-weight: 600 !important;
+    letter-spacing: 4px !important;
+    color: var(--text-primary) !important;
     margin: 0 !important;
     text-transform: uppercase;
 }
 
-.main-title p {
-    font-size: 15px;
-    color: #64748b;
-    margin-top: 8px;
-    letter-spacing: 3px;
-    font-weight: 300;
+.header-bar p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+    font-weight: 400;
 }
 
 .badges-row {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 8px;
+    margin-top: 22px;
     flex-wrap: wrap;
 }
 
 .badge-item {
-    padding: 6px 14px;
-    border-radius: 6px;
+    padding: 5px 12px;
+    border-radius: 5px;
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.8px;
-    border: 1px solid #1e293b;
-    background: transparent;
-    color: #94a3b8;
-    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-panel-raised);
+    color: var(--text-secondary);
 }
 
-.badge-item.green {
-    border-color: #10b981;
-    color: #10b981;
+.badge-item.metric {
+    border-color: rgba(45, 212, 191, 0.35);
+    color: var(--accent-primary);
+    background: rgba(45, 212, 191, 0.06);
 }
 
-.divider {
-    border: none;
-    border-top: 1px solid #1e293b;
-    margin: 0 60px;
+.content-row {
+    padding: 28px 32px;
 }
 
 .chat-panel {
-    background: #111318;
-    border: 1px solid #1e293b;
-    border-radius: 12px;
-    padding: 24px;
-    min-height: 500px;
+    background: var(--bg-panel) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 10px !important;
+    padding: 22px !important;
+    min-height: 480px;
 }
 
 .chat-msg {
-    padding: 16px 20px;
-    margin-bottom: 16px;
-    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    border-radius: 8px;
     font-size: 14px;
-    line-height: 1.7;
-    color: #e2e8f0;
+    line-height: 1.65;
+    color: var(--text-primary);
+    background: var(--bg-panel-raised);
+    border: 1px solid var(--border-subtle);
+    border-left: 2px solid var(--border-strong);
 }
 
 .chat-msg.patient {
-    background: #1a1d2e;
-    border-left: 3px solid #6366f1;
+    border-left-color: var(--accent-patient);
 }
 
 .chat-msg.ella {
-    background: #111827;
-    border-left: 3px solid #10b981;
+    border-left-color: var(--accent-ella);
 }
 
 .chat-msg strong {
-    color: #f8fafc;
+    color: var(--text-secondary);
     font-weight: 600;
     display: block;
     margin-bottom: 6px;
-    font-size: 12px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
+}
+
+.chat-msg.patient strong {
+    color: var(--accent-patient);
+}
+
+.chat-msg.ella strong {
+    color: var(--accent-ella);
 }
 
 .pipeline-panel {
-    background: #111318;
-    border: 1px solid #1e293b;
-    border-radius: 12px;
-    padding: 24px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 22px;
     height: 100%;
 }
 
 .pipeline-panel h3 {
-    color: #ffffff !important;
-    font-size: 13px !important;
+    color: var(--text-primary) !important;
+    font-size: 12px !important;
     font-weight: 600 !important;
-    letter-spacing: 2px;
+    letter-spacing: 1.6px;
     text-transform: uppercase;
-    margin: 0 0 24px 0 !important;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #1e293b;
+    margin: 0 0 20px 0 !important;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .pipeline-card {
-    background: #1a1d2e;
-    border: 1px solid #1e293b;
+    background: var(--bg-panel-raised);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
 }
 
 .pipeline-label {
     font-size: 10px;
     font-weight: 600;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
-    color: #6366f1;
-    margin-bottom: 10px;
+    color: var(--accent-secondary);
+    margin-bottom: 8px;
     display: block;
 }
 
 .pipeline-value {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     line-height: 1.6;
     word-wrap: break-word;
 }
 
 .input-row {
-    background: #111318;
-    border: 1px solid #1e293b;
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-top: 16px;
+    background: var(--bg-panel) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 10px !important;
+    padding: 14px 16px !important;
+    margin-top: 14px !important;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .input-row textarea {
-    background: #1a1d2e !important;
-    border: 1px solid #1e293b !important;
-    color: #e2e8f0 !important;
-    border-radius: 8px !important;
+    background: var(--bg-panel-raised) !important;
+    border: 1px solid var(--border-strong) !important;
+    color: var(--text-primary) !important;
+    border-radius: 7px !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 14px !important;
-    padding: 12px 16px !important;
+    padding: 11px 14px !important;
     flex: 1 !important;
 }
 
 .input-row textarea:focus {
-    border-color: #6366f1 !important;
+    border-color: var(--accent-primary) !important;
     outline: none !important;
 }
 
 .send-btn {
-    background: #6366f1 !important;
-    color: white !important;
+    background: var(--accent-primary) !important;
+    color: #06110f !important;
     border: none !important;
-    border-radius: 8px !important;
-    font-weight: 500 !important;
-    padding: 12px 28px !important;
-    font-size: 14px !important;
-    letter-spacing: 0.5px;
-    min-width: 100px !important;
+    border-radius: 7px !important;
+    font-weight: 600 !important;
+    padding: 11px 26px !important;
+    font-size: 13px !important;
+    letter-spacing: 0.4px;
+    min-width: 96px !important;
 }
 
 .send-btn:hover {
-    background: #5558e6 !important;
+    background: #26b8a4 !important;
 }
 
 .clear-btn {
     background: transparent !important;
-    color: #64748b !important;
-    border: 1px solid #1e293b !important;
-    border-radius: 8px !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: 7px !important;
     font-weight: 500 !important;
-    padding: 12px 20px !important;
-    font-size: 14px !important;
+    padding: 11px 18px !important;
+    font-size: 13px !important;
 }
 
 .clear-btn:hover {
-    border-color: #334155 !important;
-    color: #94a3b8 !important;
+    border-color: var(--text-muted) !important;
+    color: var(--text-primary) !important;
 }
 
 .footer-text {
     text-align: center;
-    padding: 32px 0 24px;
-    color: #334155;
-    font-size: 12px;
-    letter-spacing: 0.5px;
+    padding: 24px 0 28px;
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    line-height: 1.8;
+    border-top: 1px solid var(--border-subtle);
+    margin-top: 12px;
 }
 
 label {
     display: block !important;
-    color: #94a3b8 !important;
-    font-size: 12px !important;
+    color: var(--text-secondary) !important;
+    font-size: 11px !important;
     font-weight: 500 !important;
     margin-bottom: 6px !important;
 }
 
 textarea, input[type="text"] {
-    background: #1a1d2e !important;
-    border: 1px solid #334155 !important;
-    color: #e2e8f0 !important;
-    border-radius: 8px !important;
+    background: var(--bg-panel-raised) !important;
+    border: 1px solid var(--border-strong) !important;
+    color: var(--text-primary) !important;
+    border-radius: 7px !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 14px !important;
 }
 
 textarea:focus, input[type="text"]:focus {
-    border-color: #6366f1 !important;
+    border-color: var(--accent-primary) !important;
     outline: none !important;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+    box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.15) !important;
 }
 
 textarea::placeholder, input[type="text"]::placeholder {
-    color: #475569 !important;
+    color: var(--text-muted) !important;
 }
 """
 
 with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Base()) as demo:
     # Header
     gr.HTML("""
-        <div class="main-title">
-            <h1>ELLA</h1>
-            <p>Medical Triage & Clinical RAG Engine</p>
+        <div class="header-bar">
+            <div class="brand-row">
+                <span class="brand-mark"></span>
+                <h1>Ella</h1>
+            </div>
+            <p>Medical Triage &amp; Clinical RAG Engine</p>
             <div class="badges-row">
                 <span class="badge-item">NVIDIA NIM</span>
                 <span class="badge-item">Pinecone</span>
                 <span class="badge-item">Groq</span>
-                <span class="badge-item green">90,306 records</span>
-                <span class="badge-item green">96% accuracy</span>
+                <span class="badge-item metric">90,306 records</span>
+                <span class="badge-item metric">96% accuracy</span>
             </div>
         </div>
-        <hr class="divider">
     """)
 
-    with gr.Row(equal_height=True):
+    with gr.Row(equal_height=True, elem_classes=["content-row"]):
         # Chat Column
         with gr.Column(scale=3):
             chat_display = gr.Markdown(
@@ -359,24 +405,21 @@ with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Bas
         with gr.Column(scale=2):
             gr.HTML('<div class="pipeline-panel"><h3>Pipeline Output</h3>')
 
-            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Intent</span>')
+            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Intent</span></div>')
             intent_output = gr.Textbox(show_label=False, interactive=False, elem_classes=["pipeline-value"])
-            gr.HTML('</div>')
 
-            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Thought Process</span>')
+            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Thought Process</span></div>')
             thought_output = gr.Textbox(show_label=False, interactive=False, lines=3, elem_classes=["pipeline-value"])
-            gr.HTML('</div>')
 
-            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Retrieved Context</span>')
+            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Retrieved Context</span></div>')
             context_output = gr.Textbox(show_label=False, interactive=False, lines=5, elem_classes=["pipeline-value"])
-            gr.HTML('</div>')
 
             gr.HTML('</div>')
 
     gr.HTML("""
         <div class="footer-text">
-            NVIDIA NIM Embeddings • Pinecone Vector DB • Groq LLM • CrossEncoder Reranker<br>
-            90,306 clinical text chunks • Hybrid retrieval • 96% intent accuracy
+            NVIDIA NIM Embeddings &bull; Pinecone Vector DB &bull; Groq LLM &bull; CrossEncoder Reranker<br>
+            90,306 clinical text chunks &bull; Hybrid retrieval &bull; 96% intent accuracy
         </div>
     """)
 
@@ -396,18 +439,18 @@ with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Bas
     submit_btn.click(
         process_query_gpu,
         inputs=[user_input, history_state],
-        outputs=[history_state, chat_display, intent_output, thought_output, context_output],
+        outputs=[history_state, intent_output, thought_output, context_output, user_input],
     ).then(
         update_chat, inputs=[history_state], outputs=[chat_display]
-    ).then(lambda: "", outputs=user_input)
+    )
 
     user_input.submit(
         process_query_gpu,
         inputs=[user_input, history_state],
-        outputs=[history_state, chat_display, intent_output, thought_output, context_output],
+        outputs=[history_state, intent_output, thought_output, context_output, user_input],
     ).then(
         update_chat, inputs=[history_state], outputs=[chat_display]
-    ).then(lambda: "", outputs=user_input)
+    )
 
     clear_btn.click(
         clear_all,
