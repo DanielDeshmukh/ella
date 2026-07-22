@@ -8,39 +8,121 @@
 
 <br>
 
+[![PyPI](https://img.shields.io/badge/PyPI_ella--sdk-white?style=flat-square&labelColor=000000&color=000000&logo=pypi&logoColor=white)](https://pypi.org/project/ella-sdk/)
 [![96% Accuracy](https://img.shields.io/badge/96%25_Accuracy-white?style=flat-square&labelColor=000000&color=000000&logo=checkmark&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
 [![90K Records](https://img.shields.io/badge/90K_Records-white?style=flat-square&labelColor=000000&color=000000&logo=database&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
 [![NVIDIA NIM](https://img.shields.io/badge/NVIDIA_NIM-white?style=flat-square&labelColor=000000&color=000000&logo=nvidia&logoColor=white)](https://build.nvidia.com)
 [![Pinecone](https://img.shields.io/badge/Pinecone-white?style=flat-square&labelColor=000000&color=000000&logo=pinecone&logoColor=white)](https://pinecone.io)
 [![Live Demo](https://img.shields.io/badge/Live_Demo-white?style=flat-square&labelColor=000000&color=000000&logo=gradio&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
 [![GitHub](https://img.shields.io/badge/Source_Code-white?style=flat-square&labelColor=000000&color=000000&logo=github&logoColor=white)](https://github.com/DanielDeshmukh/ella)
-[![License](https://img.shields.io/badge/MIT_License-white?style=flat-square&labelColor=000000&color=000000&logo=open-source-initiative&logoColor=white)](https://opensource.org/licenses/MIT)
 
 <br>
 
-**Ella is a production-grade Retrieval-Augmented Generation (RAG) system purpose-built for medical triage.**  
+**Ella is a production-grade Retrieval-Augmented Generation (RAG) system purpose-built for medical triage.**
 She ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them in Pinecone, and retrieves context-grounded answers through a multi-stage pipeline — eliminating hallucinations in healthcare workflows.
 
-[Key Features](#key-features) •
+[Install](#install) •
+[Quick Start](#quick-start) •
 [Architecture](#architecture) •
 [Live Demo](#live-demo) •
-[Python SDK](#use-via-api) •
-[CLI](#cli)
+[Benchmark](#benchmark)
 
 </div>
 
 ---
 
-## Key Features
+## Install
 
-- **90,000+ Clinical Chunks** — Ingested from medical handbooks, symptom guides, and pharmacology references
-- **NVIDIA NIM Embeddings** — `nvidia/nv-embedqa-e5-v5` (1024-dim) via OpenAI-compatible API for semantic search
-- **Pinecone Vector DB** — Serverless cloud storage with cosine similarity for instant retrieval
-- **Hybrid Search** — Semantic (NIM) + BM25 keyword matching + CrossEncoder reranking
-- **5-Class Intent Router** — Emergency, Triage, Booking, General Info, Closing — validated via Pydantic schemas
-- **96% Intent Accuracy** — Benchmark-validated on 50 curated clinical queries
-- **Guardrail System** — Emergency detection prevents life-threatening cases from being misrouted
-- **Multi-Turn State Awareness** — Conversation history maintained across triage sessions
+```bash
+pip install ella-sdk
+```
+
+---
+
+## Quick Start
+
+```python
+from ella_medical import Ella
+
+client = Ella()
+response = client.query("What are the symptoms of a heart attack?")
+
+print(response.intent)         # "TRIAGE"
+print(response.response)       # Grounded clinical response
+```
+
+---
+
+## Usage
+
+### Basic Query
+
+```python
+from ella_medical import Ella
+
+client = Ella()
+response = client.query("What are the symptoms of a heart attack?")
+
+print(response.intent)              # "TRIAGE"
+print(response.priority)            # Priority level
+print(response.thought_process)     # Router's reasoning
+print(response.response)            # Ella's response
+print(response.retrieved_context)   # Retrieved medical documents
+```
+
+### Multi-Turn Conversation
+
+```python
+from ella_medical import Ella
+
+client = Ella()
+
+# First message
+r1 = client.query("I have chest pain")
+
+# Follow-up
+r2 = client.query(
+    "What about treatment options?",
+    history=f"Patient: I have chest pain\nElla: {r1.response}"
+)
+
+print(r2.response)
+```
+
+### Context Manager
+
+```python
+from ella_medical import Ella
+
+with Ella() as client:
+    response = client.query("What are the symptoms of diabetes?")
+    print(response.response)
+```
+
+### Response Object
+
+```python
+@dataclass
+class QueryResponse:
+    intent: str            # EMERGENCY | TRIAGE | BOOKING | GENERAL_INFO | CLOSING
+    priority: str          # Priority level
+    thought_process: str   # Router's reasoning
+    justification: str     # Clinical justification
+    response: str          # Ella's response
+    retrieved_context: str # Retrieved medical documents
+```
+
+---
+
+## Live Demo
+
+<div align="center">
+
+[![Try Ella Live](https://img.shields.io/badge/TRY_ELLA_LIVE-white?style=flat-square&labelColor=000000&color=000000&logo=gradio&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
+
+**[→ Launch Ella on HuggingFace Spaces](https://huggingface.co/spaces/Daniel2503/ella-medical)**
+
+</div>
 
 ---
 
@@ -95,23 +177,7 @@ She ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores the
 
 ---
 
-## Live Demo
-
-<div align="center">
-
-[![Try Ella Live](https://img.shields.io/badge/TRY_ELLA_LIVE-white?style=flat-square&labelColor=000000&color=000000&logo=gradio&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
-
-**[→ Launch Ella on HuggingFace Spaces](https://huggingface.co/spaces/Daniel2503/ella-medical)**
-
-</div>
-
-Ella is deployed on HuggingFace Spaces with a custom dark medical UI. Type a medical question and see the full pipeline in action — intent classification, thought process, retrieved context, and grounded response.
-
----
-
 ## Benchmark
-
-Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 5 General Info, 5 Closing):
 
 | Metric | Value |
 |--------|-------|
@@ -119,8 +185,6 @@ Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 
 | **Avg Latency** | 9.26s |
 | **Avg Retrieval Score** | 0.92 |
 | **Records in DB** | 90,306 |
-
-### Intent Breakdown
 
 | Intent | Correct | Total | Accuracy |
 |--------|---------|-------|----------|
@@ -132,130 +196,17 @@ Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 
 
 ---
 
-## How It Works
-
-### 1. Intent Routing
-Every patient message passes through a **State-Aware Router** powered by Groq's `llama-3.1-8b-instant`. The router analyzes both the current input and conversation history, classifying intent into one of five streams: Emergency, Triage, Booking, General Info, or Closing. Outputs are validated via Pydantic schemas to guarantee structured responses.
-
-### 2. Emergency Guardrail
-Before any retrieval occurs, the system checks for life-threatening keywords and patterns. If detected, Ella immediately escalates to emergency protocol — bypassing the standard RAG pipeline to ensure patient safety.
-
-### 3. Hybrid Retrieval
-For clinical queries, Ella executes a **three-stage retrieval pipeline**:
-- **Stage 1 — Semantic Search:** NVIDIA NIM embeddings (`nv-embedqa-e5-v5`) convert the query into a 1024-dimensional vector. Pinecone returns the top-15 candidates via cosine similarity.
-- **Stage 2 — BM25 Reranking:** A keyword-based BM25 algorithm re-scores candidates to capture medical terminology that semantic search might miss.
-- **Stage 3 — CrossEncoder Precision:** A `ms-marco-MiniLM-L-6-v2` cross-encoder reranks the top-10 results, selecting the top-3 most relevant passages.
-
-### 4. Grounded Synthesis
-The LLM receives the patient query alongside the retrieved clinical context. Every response includes:
-- **Clinical justification** — why this information applies
-- **Source attribution** — which medical handbook the data came from
-- **Confidence scoring** — retrieval similarity score for transparency
-
-### 5. Multi-Turn State
-Ella maintains conversation history across sessions. If a patient says "yes" after describing symptoms, the router understands the context and continues the triage flow — enabling natural, human-like clinical conversations.
-
----
-
 ## Tech Stack
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
+| **SDK** | `ella-sdk` (PyPI) | Python client |
 | **Embeddings** | NVIDIA NIM (`nv-embedqa-e5-v5`) | 1024-dim semantic vectors |
 | **Vector DB** | Pinecone (Serverless, AWS) | Cosine similarity search |
 | **LLM** | Groq (`llama-3.1-8b-instant`) | Intent classification + response generation |
 | **Reranker** | CrossEncoder (`ms-marco-MiniLM-L-6-v2`) | Precision reranking |
 | **Orchestration** | LangChain + LangGraph | Agent pipeline |
 | **Validation** | Pydantic | Schema-validated outputs |
-| **Data** | SQLite + PDFs | 90k clinical text chunks |
-
----
-
-## CLI
-
-Ella ships with a single command entry point:
-
-```bash
-# Install
-pip install -e .
-
-# Interactive triage session
-ella
-
-# Start API server (localhost:8000)
-ella serve
-```
-
----
-
-## Use via API
-
-Ella is available as a Python SDK — just like OpenAI or Groq.
-
-### Install
-
-```bash
-pip install ella-medical
-```
-
-### Quick Start
-
-```python
-from ella_medical import Ella
-
-client = Ella()
-response = client.query("What are the symptoms of a heart attack?")
-
-print(response.intent)         # "TRIAGE"
-print(response.thought_process)
-print(response.response)       # Grounded clinical response
-print(response.retrieved_context)
-```
-
-### With Conversation History
-
-```python
-from ella_medical import Ella
-
-client = Ella()
-
-# First message
-r1 = client.query("I have chest pain")
-
-# Follow-up (pass history from previous response)
-r2 = client.query(
-    "What about treatment options?",
-    history=f"Patient: I have chest pain\nElla: {r1.response}"
-)
-
-print(r2.response)
-```
-
-### Local Server
-
-```bash
-# Start the FastAPI server
-ella serve
-
-# Connect with custom base URL
-from ella_medical import Ella
-
-client = Ella(base_url="http://localhost:8000")
-response = client.query("What are the symptoms of a heart attack?")
-```
-
-### Response Object
-
-```python
-@dataclass
-class QueryResponse:
-    intent: str            # EMERGENCY | TRIAGE | BOOKING | GENERAL_INFO | CLOSING
-    priority: str          # Priority level
-    thought_process: str   # Router's reasoning
-    justification: str     # Clinical justification
-    response: str          # Ella's response
-    retrieved_context: str # Retrieved medical documents
-```
 
 ---
 
