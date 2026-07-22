@@ -1,21 +1,28 @@
 """
 Ella CLI — Medical Triage & Clinical RAG Engine
-Entry point: `ella` command after pip install
 """
 import os
 import sys
 import time
-import typer
 from pathlib import Path
 from dotenv import load_dotenv
-from rich.console import Console
-from rich.panel import Panel
 
 load_dotenv()
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
+import typer
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+from rich.table import Table
+from rich.columns import Columns
+from rich.markdown import Markdown
+from rich.rule import Rule
+from rich import box
+
+app = typer.Typer(name="ella", help="Medical Triage & Clinical RAG Engine", no_args_is_help=False)
 console = Console()
 
 CLOSING_PHRASES = [
@@ -24,71 +31,153 @@ CLOSING_PHRASES = [
     "that's all", "done", "end", "quit", "exit",
 ]
 
+INTENT_COLORS = {
+    "EMERGENCY": "bold red",
+    "TRIAGE": "bold yellow",
+    "BOOKING": "bold blue",
+    "GENERAL_INFO": "bold cyan",
+    "CLOSING": "bold dim",
+}
 
-def stream_ella_voice(text: str):
-    """Streams output with a professional typing effect."""
-    print(f"\nElla > ", end="", flush=True)
-    for char in text:
-        print(char, end="", flush=True)
-        time.sleep(0.012)
-    print()
+INTENT_ICONS = {
+    "EMERGENCY": "[bold red]\u26a0[/bold red]",
+    "TRIAGE": "[bold yellow]\u25b2[/bold yellow]",
+    "BOOKING": "[bold blue]\u25c6[/bold blue]",
+    "GENERAL_INFO": "[bold cyan]\u2139[/bold cyan]",
+    "CLOSING": "[dim]\u2716[/dim]",
+}
 
 
 def is_closing(text: str) -> bool:
-    """Check if input is a closing/farewell phrase."""
     lower = text.lower().strip().rstrip("!.?")
     return any(lower == phrase or lower.startswith(phrase) for phrase in CLOSING_PHRASES)
 
 
-def launch_ella():
-    """Main entry point — `ella` launches this directly."""
+def stream_text(text: str, speed: float = 0.008):
+    """Character-by-character streaming."""
+    for char in text:
+        print(char, end="", flush=True)
+        if char in ".!?\n":
+            time.sleep(speed * 4)
+        elif char == ",":
+            time.sleep(speed * 2)
+        else:
+            time.sleep(speed)
+    print()
+
+
+def render_header():
+    console.print()
+    console.print(Rule(style="#2a3340"))
+    header = Text()
+    header.append("  ELLA", style="bold white")
+    header.append("  ", style="default")
+    header.append("Medical Triage & Clinical RAG Engine", style="dim")
+    console.print(header)
+    console.print(Rule(style="#2a3340"))
+    console.print()
+
+
+def render_response(response_text: str, intent: str, priority: str, sources: str):
+    """Render a polished response panel."""
+    # Intent badge
+    color = INTENT_COLORS.get(intent, "white")
+    icon = INTENT_ICONS.get(intent, "")
+    badge = f"{icon} [{color}]{intent}[/{color}]"
+    if priority:
+        badge += f" [dim]{priority}[/dim]"
+
+    # Response panel
+    response_text = response_text.strip()
+    console.print()
+    console.print(Panel(
+        response_text,
+        title=badge,
+        title_align="left",
+        border_style="#2a3340",
+        padding=(1, 2),
+        box=box.ROUNDED,
+    ))
+
+    # Sources
+    if sources and sources.strip():
+        console.print()
+        source_lines = [l.strip() for l in sources.split("\n") if l.strip()]
+        source_table = Table(show_header=False, box=None, padding=(0, 1))
+        source_table.add_column(style="dim")
+        for line in source_lines[:3]:
+            source_table.add_row(line)
+        console.print(Panel(
+            source_table,
+            title="[dim]Sources[/dim]",
+            title_align="left",
+            border_style="#1e2530",
+            padding=(0, 1),
+            box=box.SIMPLE,
+        ))
+
+    console.print()
+
+
+@app.command(invoke_without_command=True)
+def main(ctx: typer.Context):
+    """Start an interactive triage session."""
+    if ctx.invoked_subcommand is not None:
+        return
+
     from src.agents.router import EllaRouter
     from src.agents.guardrails import EmergencyGuardrail
 
     try:
         router = EllaRouter()
     except Exception as e:
-        console.print(f"[red]Failed to initialize Ella: {e}[/red]")
+        console.print(f"[red]Failed to initialize: {e}[/red]")
         raise typer.Exit()
 
     chat_history = []
-
-    console.print(Panel(
-        "[bold white]ELLA[/bold white]\n"
-        "[green]Medical Triage & Clinical RAG Engine[/green]\n"
-        "[dim]Type 'bye' or 'exit' to end session[/dim]",
-        border_style="#333333"
-    ))
+    render_header()
+    console.print("  [dim]Type[/dim] [bold dim]'bye'[/bold dim] [dim]to end  \u00b7  [dim]Press[/dim] [bold dim]Ctrl+C[/bold dim] [dim]to exit[/dim]")
+    console.print()
 
     while True:
         try:
-            user_input = console.input("\n[bold white]You > [/bold white]").strip()
-
+            user_input = console.input("  [bold]\u2588 You >[/bold] ").strip()
             if not user_input:
                 continue
 
             if is_closing(user_input):
                 try:
-                    farewell_prompt = "Give a warm, brief medical farewell. Wish them well. 1-2 sentences max."
-                    final_farewell = router.raw_llm.invoke(farewell_prompt)
-                    output = final_farewell.content if hasattr(final_farewell, 'content') else str(final_farewell)
-                    stream_ella_voice(output.strip())
+                    farewell = router.raw_llm.invoke("Give a warm, brief medical farewell. 1 sentence.")
+                    output = farewell.content if hasattr(farewell, 'content') else str(farewell)
+                    console.print()
+                    stream_text(f"  \u2022 {output.strip()}", speed=0.01)
                 except Exception:
-                    stream_ella_voice("Take care and stay healthy. Goodbye!")
-                console.print("\n[dim]Session ended.[/dim]\n")
+                    console.print("\n  \u2022 Take care and stay healthy. Goodbye!")
+                console.print()
+                console.print(Rule(style="#2a3340"))
+                console.print("  [dim]Session ended.[/dim]")
+                console.print()
                 break
 
             history_str = "\n".join([f"{m['role']}: {m['content']}" for m in chat_history[-3:]])
 
-            try:
-                with console.status("[dim]Consulting Medical Handbooks...[/dim]"):
+            with console.status("  [dim]Consulting medical handbooks...[/dim]", spinner="dots"):
+                try:
                     decision = router.route_request(user_input, history=history_str)
-            except Exception:
-                console.print("[red]Could not process input. Please try again.[/red]")
-                continue
+                except Exception:
+                    console.print("  [red]\u2717 Could not process. Try again.[/red]")
+                    continue
 
             if decision.intent == "EMERGENCY":
-                console.print(f"\n[bold red]RED FLAG:[/bold red] {decision.justification}")
+                console.print()
+                console.print(Panel(
+                    f"[bold white]{decision.justification}[/bold white]",
+                    title="[bold red]\u26a0 EMERGENCY[/bold red]",
+                    title_align="left",
+                    border_style="red",
+                    padding=(0, 2),
+                    box=box.DOUBLE,
+                ))
                 try:
                     EmergencyGuardrail.trigger()
                 except Exception:
@@ -112,9 +201,14 @@ def launch_ella():
             try:
                 final_res = router.raw_llm.invoke(prompt)
                 output = final_res.content if hasattr(final_res, 'content') else str(final_res)
-                stream_ella_voice(output.strip())
+                render_response(
+                    response_text=output.strip(),
+                    intent=decision.intent,
+                    priority=decision.priority,
+                    sources=context,
+                )
             except Exception:
-                stream_ella_voice("I'm having trouble processing that. Could you rephrase your question?")
+                console.print("  [red]Trouble processing. Please try again.[/red]")
 
             chat_history.append({"role": "Patient", "content": user_input})
             chat_history.append({"role": "Ella", "content": output.strip() if 'output' in dir() else ""})
@@ -122,19 +216,14 @@ def launch_ella():
                 chat_history = chat_history[-10:]
 
         except KeyboardInterrupt:
-            console.print("\n\n[dim]Session ended.[/dim]\n")
+            console.print("\n\n  [dim]Session ended.[/dim]\n")
             break
         except EOFError:
             break
         except Exception:
-            console.print("[red]Something went wrong. Please try again.[/red]")
+            console.print("  [red]Something went wrong.[/red]")
             continue
 
 
-def main():
-    """Entry point: `ella` launches the triage session."""
-    launch_ella()
-
-
 if __name__ == "__main__":
-    main()
+    app()

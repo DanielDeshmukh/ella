@@ -1,7 +1,6 @@
 """Response models for Ella Medical SDK."""
 
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 
 @dataclass
@@ -20,20 +19,42 @@ class QueryResponse:
 
     def __str__(self) -> str:
         lines = [
+            f"\n  \u2500" * 30,
             f"  Intent:     {self.intent}",
             f"  Priority:   {self.priority}",
-            f"  Response:   {self.response[:200]}{'...' if len(self.response) > 200 else ''}",
-            f"  Context:    {self.retrieved_context[:100]}{'...' if len(self.retrieved_context) > 100 else ''}",
+            f"  \u2500" * 30,
+            f"\n{self.response}",
         ]
+        if self.retrieved_context:
+            lines.append(f"\n  \u2500" * 30)
+            lines.append(f"  Sources:")
+            for line in self.retrieved_context.strip().split("\n")[:3]:
+                lines.append(f"  {line.strip()}")
+        lines.append(f"  \u2500" * 30 + "\n")
         return "\n".join(lines)
 
     def show(self):
         """Pretty-print the full response."""
-        print("\n" + "=" * 60)
-        print(f"  ELLA — {self.intent}")
-        print("=" * 60)
-        print(f"\n{self.response}")
+        INTENT_ICONS = {
+            "EMERGENCY": "\u26a0",
+            "TRIAGE": "\u25b2",
+            "BOOKING": "\u25c6",
+            "GENERAL_INFO": "\u2139",
+            "CLOSING": "\u2716",
+        }
+        icon = INTENT_ICONS.get(self.intent, "\u25cf")
+        sep = "\u2500" * 56
+
+        print(f"\n{sep}")
+        print(f"  {icon}  {self.intent}  {self.priority}")
+        print(sep)
+        print()
+        print(self.response)
+
         if self.retrieved_context:
-            print(f"\n{'─' * 60}")
-            print(f"  Sources:\n{self.retrieved_context}")
-        print("=" * 60 + "\n")
+            print(f"\n{sep}")
+            print("  Sources:")
+            for line in self.retrieved_context.strip().split("\n")[:3]:
+                print(f"  {line.strip()}")
+
+        print(f"{sep}\n")
