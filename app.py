@@ -14,6 +14,8 @@ ROOT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT_DIR))
 
 import gradio as gr
+import spaces
+import torch
 from src.agents.router import EllaRouter
 from src.agents.guardrails import EmergencyGuardrail
 
@@ -26,6 +28,12 @@ def initialize_ella():
     if router is None:
         router = EllaRouter()
     return router
+
+
+@spaces.GPU
+def process_query_gpu(user_input, history):
+    """Wrapper that satisfies ZeroGPU requirement."""
+    return process_query(user_input, history)
 
 
 def process_query(user_input, history):
@@ -152,13 +160,13 @@ with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Sof
 
     # Events
     submit_btn.click(
-        process_query,
+        process_query_gpu,
         inputs=[user_input, history_state],
         outputs=[history_state, chat_display, intent_output, thought_output, response_output, context_output],
     ).then(lambda: "", outputs=user_input)
 
     user_input.submit(
-        process_query,
+        process_query_gpu,
         inputs=[user_input, history_state],
         outputs=[history_state, chat_display, intent_output, thought_output, response_output, context_output],
     ).then(lambda: "", outputs=user_input)
@@ -170,4 +178,4 @@ with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Sof
 
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(ssr_mode=False)

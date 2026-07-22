@@ -8,6 +8,7 @@ sdk_version: 5.34.2
 app_file: app.py
 pinned: true
 license: mit
+hardware: cpu-basic
 ---
 
 > ⭐ If Ella's RAG-based medical triage architecture gave you ideas — a star helps other health-AI builders find it. Takes 2 seconds.

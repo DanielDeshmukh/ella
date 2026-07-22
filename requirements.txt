@@ -1,4 +1,6 @@
 gradio
+spaces
+torch
 langchain
 langchain-openai
 langchain-groq
