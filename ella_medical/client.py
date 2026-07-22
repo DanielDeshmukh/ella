@@ -42,7 +42,7 @@ class Ella:
         """
         from gradio_client import Client
 
-        self._client = Client(space, token=api_key)
+        self._client = Client(space, token=api_key, verbose=False)
 
     def query(
         self,
