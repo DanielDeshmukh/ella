@@ -111,8 +111,8 @@ Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 
 
 | Metric | Value |
 |--------|-------|
-| **Intent Accuracy** | 76.0% |
-| **Avg Latency** | 8.95s |
+| **Intent Accuracy** | 96.0% |
+| **Avg Latency** | 9.26s |
 | **Avg Retrieval Score** | 0.92 |
 | **Records in DB** | 90,306 |
 
@@ -120,11 +120,11 @@ Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 
 
 | Intent | Correct | Total | Accuracy |
 |--------|---------|-------|----------|
-| EMERGENCY | 9 | 10 | 90% |
-| TRIAGE | 12 | 20 | 60% |
-| BOOKING | 8 | 10 | 80% |
+| EMERGENCY | 10 | 10 | 100% |
+| TRIAGE | 18 | 20 | 90% |
+| BOOKING | 10 | 10 | 100% |
 | GENERAL_INFO | 5 | 5 | 100% |
-| CLOSING | 4 | 5 | 80% |
+| CLOSING | 5 | 5 | 100% |
 
 ---
 
