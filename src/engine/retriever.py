@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Optional
 from pinecone import Pinecone
 from langchain_core.documents import Document
-from langchain_ollama import OllamaEmbeddings
+from src.engine.nim_embeddings import NIMEmbeddings
 from rank_bm25 import BM25Okapi
 from sentence_transformers import CrossEncoder
 from rich.console import Console
@@ -25,7 +25,7 @@ class EllaRetriever:
             
         console.print(f"[bold green]✓[/bold green] [dim]Hardware Acceleration: {self.device.upper()}[/dim]")
         
-        self.embeddings = OllamaEmbeddings(model="mxbai-embed-large")
+        self.embeddings = NIMEmbeddings()
         
         console.print("[dim]Loading Phase 7 Reranker (MiniLM-L6)...[/dim]")
         self.reranker = CrossEncoder(
