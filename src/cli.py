@@ -16,65 +16,83 @@ load_dotenv()
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
-app = typer.Typer(
-    name="ella",
-    help="Medical Triage & Clinical RAG Engine",
-    add_completion=False,
-    no_args_is_help=False,
-)
 console = Console()
+
+CLOSING_PHRASES = [
+    "bye", "goodbye", "tata", "see you", "see ya", "take care",
+    "cya", "later", "gotta go", "i'm leaving", "i have to go",
+    "that's all", "done", "end", "quit", "exit",
+]
 
 
 def stream_ella_voice(text: str):
     """Streams output with a professional typing effect."""
-    print(f"Ella > ", end="", flush=True)
+    print(f"\nElla > ", end="", flush=True)
     for char in text:
         print(char, end="", flush=True)
-        time.sleep(0.01)
-    print("\n")
+        time.sleep(0.012)
+    print()
 
 
-@app.command()
-def chat():
-    """Start an interactive triage session with Ella."""
+def is_closing(text: str) -> bool:
+    """Check if input is a closing/farewell phrase."""
+    lower = text.lower().strip().rstrip("!.?")
+    return any(lower == phrase or lower.startswith(phrase) for phrase in CLOSING_PHRASES)
+
+
+def launch_ella():
+    """Main entry point — `ella` launches this directly."""
     from src.agents.router import EllaRouter
     from src.agents.guardrails import EmergencyGuardrail
 
-    router = EllaRouter()
+    try:
+        router = EllaRouter()
+    except Exception as e:
+        console.print(f"[red]Failed to initialize Ella: {e}[/red]")
+        raise typer.Exit()
+
     chat_history = []
 
     console.print(Panel(
-        "[bold white]ELLA CORE v1.1.0[/bold white]\n"
-        "[green]Context-Aware Routing Active[/green]\n"
-        "[blue]Hard-RAG Protocol: De-Robotized[/blue]\n"
-        "[yellow]Session Ready[/yellow]",
+        "[bold white]ELLA[/bold white]\n"
+        "[green]Medical Triage & Clinical RAG Engine[/green]\n"
+        "[dim]Type 'bye' or 'exit' to end session[/dim]",
         border_style="#333333"
     ))
 
     while True:
         try:
-            user_input = console.input("[bold white]Patient > [/bold white]").strip()
+            user_input = console.input("\n[bold white]You > [/bold white]").strip()
 
-            if user_input.lower() in ["exit", "quit", "bye", "goodbye", "tata"]:
-                with console.status("[dim]Closing session...[/dim]"):
-                    prompt = f"The patient said '{user_input}'. Give a brief, professional medical closing and wish them well."
-                    final_farewell = router.raw_llm.invoke(prompt)
+            if not user_input:
+                continue
+
+            if is_closing(user_input):
+                try:
+                    farewell_prompt = "Give a warm, brief medical farewell. Wish them well. 1-2 sentences max."
+                    final_farewell = router.raw_llm.invoke(farewell_prompt)
                     output = final_farewell.content if hasattr(final_farewell, 'content') else str(final_farewell)
-
-                stream_ella_voice(output.strip())
-                console.print("[bold red]Session Terminated.[/bold red]")
-                raise typer.Exit()
+                    stream_ella_voice(output.strip())
+                except Exception:
+                    stream_ella_voice("Take care and stay healthy. Goodbye!")
+                console.print("\n[dim]Session ended.[/dim]\n")
+                break
 
             history_str = "\n".join([f"{m['role']}: {m['content']}" for m in chat_history[-3:]])
 
-            with console.status("[dim]Consulting Medical Handbooks...[/dim]"):
-                decision = router.route_request(user_input, history=history_str)
+            try:
+                with console.status("[dim]Consulting Medical Handbooks...[/dim]"):
+                    decision = router.route_request(user_input, history=history_str)
+            except Exception:
+                console.print("[red]Could not process input. Please try again.[/red]")
+                continue
 
             if decision.intent == "EMERGENCY":
                 console.print(f"\n[bold red]RED FLAG:[/bold red] {decision.justification}")
-                EmergencyGuardrail.trigger()
-
-            console.print(f"\n[dim italic]Thought: {decision.thought_process}[/dim italic]")
+                try:
+                    EmergencyGuardrail.trigger()
+                except Exception:
+                    pass
 
             context = getattr(decision, "retrieved_context", "")
 
@@ -84,39 +102,38 @@ def chat():
                 f"DOCUMENTS RETRIEVED:\n{context}\n\n"
                 f"LATEST PATIENT INPUT: {user_input}\n\n"
                 "STRICT PROTOCOL:\n"
-                "1. INTEGRATE information naturally. Do NOT use robotic intros like 'Based on the documents' or 'According to page X'.\n"
-                "2. NO REPETITION. Do not repeat the name of the book or your previous questions.\n"
-                "3. BE CONCISE. Use the documents to identify the next logical triage step or warning.\n"
-                "4. Speak like a professional human who knows the material by heart, not like an AI reading a search result.\n"
-                "5. If no documents are relevant, stay in character but advise seeing a doctor for a definitive diagnosis."
+                "1. INTEGRATE information naturally. Do NOT use robotic intros.\n"
+                "2. NO REPETITION. Do not repeat book names or previous questions.\n"
+                "3. BE CONCISE. Identify the next logical triage step or warning.\n"
+                "4. Speak like a professional who knows the material by heart.\n"
+                "5. If no documents are relevant, advise seeing a doctor."
             )
 
-            final_res = router.raw_llm.invoke(prompt)
-            output = final_res.content if hasattr(final_res, 'content') else str(final_res)
-
-            stream_ella_voice(output.strip())
+            try:
+                final_res = router.raw_llm.invoke(prompt)
+                output = final_res.content if hasattr(final_res, 'content') else str(final_res)
+                stream_ella_voice(output.strip())
+            except Exception:
+                stream_ella_voice("I'm having trouble processing that. Could you rephrase your question?")
 
             chat_history.append({"role": "Patient", "content": user_input})
-            chat_history.append({"role": "Ella", "content": output.strip()})
+            chat_history.append({"role": "Ella", "content": output.strip() if 'output' in dir() else ""})
             if len(chat_history) > 10:
                 chat_history = chat_history[-10:]
 
-            if context:
-                console.print(f"[dim]Verified via Medical Handbooks[/dim]")
-            console.print("[dim]---[/dim]")
-
         except KeyboardInterrupt:
-            console.print("\n[red]Session Force-Closed.[/red]")
-            raise typer.Exit()
-        except typer.Exit:
-            raise
-        except Exception as e:
-            console.print(f"[red]System Error: {e}[/red]")
+            console.print("\n\n[dim]Session ended.[/dim]\n")
+            break
+        except EOFError:
+            break
+        except Exception:
+            console.print("[red]Something went wrong. Please try again.[/red]")
+            continue
 
 
 def main():
     """Entry point: `ella` launches the triage session."""
-    chat()
+    launch_ella()
 
 
 if __name__ == "__main__":
