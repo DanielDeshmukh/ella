@@ -25,13 +25,19 @@ hardware: cpu-basic
 [![Groq](https://img.shields.io/badge/Groq-Inference-E55B3C?style=for-the-badge)](https://groq.com)
 [![LangChain](https://img.shields.io/badge/LangChain-Agents-1C3C3C?style=for-the-badge)](https://langchain.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![HuggingFace Spaces](https://img.shields.io/badge/%F0%9F%A4%97-Deploy%20Live-ffd21e?style=for-the-badge)](https://huggingface.co/spaces/Daniel2503/ella-medical)
+
+[![Live Demo](https://img.shields.io/badge/TRY-ELLA_LIVE-6366f1?style=for-the-badge&logo=gradio&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
+[![GitHub](https://img.shields.io/badge/SOURCE-CODE-1e293b?style=for-the-badge&logo=github&logoColor=white)](https://github.com/DanielDeshmukh/ella)
 
 **Ella is a production-grade Retrieval-Augmented Generation (RAG) system purpose-built for medical triage.**  
-It ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them in Pinecone, and retrieves context-grounded answers through a multi-stage pipeline — eliminating hallucinations in healthcare workflows.
+She ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them in Pinecone, and retrieves context-grounded answers through a multi-stage pipeline — eliminating hallucinations in healthcare workflows.
+
+**96% Intent Accuracy** on 50 curated clinical queries • **90,306** medical records • **Live on HuggingFace**
 
 [Key Features](#key-features) •
 [Architecture](#architecture) •
-[Demo](#demo) •
+[Live Demo](#live-demo) •
 [Benchmark](#benchmark) •
 [How It Works](#how-it-works) •
 [CLI](#cli)
@@ -47,7 +53,7 @@ It ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them
 - **Pinecone Vector DB** — Serverless cloud storage with cosine similarity for instant retrieval
 - **Hybrid Search** — Semantic (NIM) + BM25 keyword matching + CrossEncoder reranking
 - **5-Class Intent Router** — Emergency, Triage, Booking, General Info, Closing — validated via Pydantic schemas
-- **76% Intent Accuracy** — Benchmark-validated on 50 curated clinical queries
+- **96% Intent Accuracy** — Benchmark-validated on 50 curated clinical queries
 - **Guardrail System** — Emergency detection prevents life-threatening cases from being misrouted
 - **Multi-Turn State Awareness** — Conversation history maintained across triage sessions
 
@@ -104,17 +110,17 @@ It ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them
 
 ---
 
-## Demo
+## Live Demo
 
 <div align="center">
 
-[![Ella Demo](https://img.shields.io/badge/WATCH-DEMO-E55B3C?style=for-the-badge&logo=youtube&logoColor=white)](https://github.com/DanielDeshmukh/ella/blob/main/docs/assets/building_medical_intelligence_with_ella_the_hard_r.mp4)
+[![Ella Live Demo](https://img.shields.io/badge/TRY_ELLA_LIVE-6366f1?style=for-the-badge&logo=gradio&logoColor=white&labelColor=6366f1)](https://huggingface.co/spaces/Daniel2503/ella-medical)
 
-*Building Medical Intelligence with Ella — First LinkedIn Demo*
+**[→ Launch Ella on HuggingFace Spaces](https://huggingface.co/spaces/Daniel2503/ella-medical)**
 
 </div>
 
-> 📹 [Watch the full demo video](docs/assets/building_medical_intelligence_with_ella_the_hard_r.mp4) — See Ella perform real-time medical triage, retrieve clinical context from 90k+ records, and generate grounded responses.
+Ella is deployed on HuggingFace Spaces with a custom dark medical UI. Type a medical question and see the full pipeline in action — intent classification, thought process, retrieved context, and grounded response.
 
 ---
 
@@ -124,7 +130,7 @@ Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 
 
 | Metric | Value |
 |--------|-------|
-| **Intent Accuracy** | 96.0% |
+| **Intent Accuracy** | **96.0%** |
 | **Avg Latency** | 9.26s |
 | **Avg Retrieval Score** | 0.92 |
 | **Records in DB** | 90,306 |
@@ -133,11 +139,11 @@ Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 
 
 | Intent | Correct | Total | Accuracy |
 |--------|---------|-------|----------|
-| EMERGENCY | 10 | 10 | 100% |
+| EMERGENCY | 10 | 10 | **100%** |
 | TRIAGE | 18 | 20 | 90% |
-| BOOKING | 10 | 10 | 100% |
-| GENERAL_INFO | 5 | 5 | 100% |
-| CLOSING | 5 | 5 | 100% |
+| BOOKING | 10 | 10 | **100%** |
+| GENERAL_INFO | 5 | 5 | **100%** |
+| CLOSING | 5 | 5 | **100%** |
 
 ---
 
@@ -182,17 +188,14 @@ Ella maintains conversation history across sessions. If a patient says "yes" aft
 
 ## CLI
 
-Ella ships with a structured CLI entry point:
+Ella ships with a single command entry point:
 
 ```bash
 # Install
 pip install -e .
 
-# Commands
-ella chat        # Start interactive triage session
-ella eval        # Run 50-query benchmark
-ella stats       # Show Pinecone index stats
-ella version     # Show version
+# Run
+ella
 ```
 
 ---
