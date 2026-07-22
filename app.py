@@ -292,7 +292,30 @@ css = """
 }
 
 label {
-    display: none !important;
+    display: block !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    margin-bottom: 6px !important;
+}
+
+textarea, input[type="text"] {
+    background: #1a1d2e !important;
+    border: 1px solid #334155 !important;
+    color: #e2e8f0 !important;
+    border-radius: 8px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+}
+
+textarea:focus, input[type="text"]:focus {
+    border-color: #6366f1 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+textarea::placeholder, input[type="text"]::placeholder {
+    color: #475569 !important;
 }
 """
 
