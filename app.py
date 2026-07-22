@@ -336,16 +336,16 @@ with gr.Blocks(css=css, title="Ella — Medical Triage RAG", theme=gr.themes.Bas
         with gr.Column(scale=2):
             gr.HTML('<div class="pipeline-panel"><h3>Pipeline Output</h3>')
 
-            with gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Intent</span>'):
-                intent_output = gr.Textbox(show_label=False, interactive=False, elem_classes=["pipeline-value"])
+            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Intent</span>')
+            intent_output = gr.Textbox(show_label=False, interactive=False, elem_classes=["pipeline-value"])
             gr.HTML('</div>')
 
-            with gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Thought Process</span>'):
-                thought_output = gr.Textbox(show_label=False, interactive=False, lines=3, elem_classes=["pipeline-value"])
+            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Thought Process</span>')
+            thought_output = gr.Textbox(show_label=False, interactive=False, lines=3, elem_classes=["pipeline-value"])
             gr.HTML('</div>')
 
-            with gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Retrieved Context</span>'):
-                context_output = gr.Textbox(show_label=False, interactive=False, lines=5, elem_classes=["pipeline-value"])
+            gr.HTML('<div class="pipeline-card"><span class="pipeline-label">Retrieved Context</span>')
+            context_output = gr.Textbox(show_label=False, interactive=False, lines=5, elem_classes=["pipeline-value"])
             gr.HTML('</div>')
 
             gr.HTML('</div>')
