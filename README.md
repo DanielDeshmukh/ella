@@ -99,7 +99,7 @@ She ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores the
 
 <div align="center">
 
-[![Ella Live Demo](https://img.shields.io/badge/TRY_ELLA_LIVE-6366f1?style=for-the-badge&logo=gradio&logoColor=white&labelColor=6366f1)](https://huggingface.co/spaces/Daniel2503/ella-medical)
+[![Try Ella Live](https://img.shields.io/badge/TRY_ELLA_LIVE-white?style=flat-square&labelColor=000000&color=000000&logo=gradio&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
 
 **[→ Launch Ella on HuggingFace Spaces](https://huggingface.co/spaces/Daniel2503/ella-medical)**
 
