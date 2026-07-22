@@ -1,0 +1,22 @@
+# AI & Orchestration
+langchain
+langchain-openai
+langgraph
+qdrant-client
+sentence-transformers
+pinecone-client
+langchain-pinecone
+langchain-groq
+langchain-ollama
+rank-bm25
+requests
+
+# API & Interface
+fastapi
+uvicorn
+typer
+python-dotenv
+
+# Utilities
+pydantic
+rich
