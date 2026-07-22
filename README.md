@@ -94,13 +94,13 @@ It ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them
 
 <div align="center">
 
-[![Ella Demo](https://img.shields.io/badge/WATCH-DEMO-E55B3C?style=for-the-badge&logo=youtube&logoColor=white)](https://github.com/DanielDeshmukh/ella/blob/main/building_medical_intelligence_with_ella_the_hard_r.mp4)
+[![Ella Demo](https://img.shields.io/badge/WATCH-DEMO-E55B3C?style=for-the-badge&logo=youtube&logoColor=white)](https://github.com/DanielDeshmukh/ella/blob/main/docs/assets/building_medical_intelligence_with_ella_the_hard_r.mp4)
 
 *Building Medical Intelligence with Ella — First LinkedIn Demo*
 
 </div>
 
-> 📹 [Watch the full demo video](building_medical_intelligence_with_ella_the_hard_r.mp4) — See Ella perform real-time medical triage, retrieve clinical context from 90k+ records, and generate grounded responses.
+> 📹 [Watch the full demo video](docs/assets/building_medical_intelligence_with_ella_the_hard_r.mp4) — See Ella perform real-time medical triage, retrieve clinical context from 90k+ records, and generate grounded responses.
 
 ---
 
