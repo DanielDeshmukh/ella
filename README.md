@@ -19,28 +19,26 @@ hardware: cpu-basic
 
 ### Medical Triage & Clinical RAG Engine
 
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![NVIDIA NIM](https://img.shields.io/badge/NVIDIA_NIM-Embeddings-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://build.nvidia.com)
-[![Pinecone](https://img.shields.io/badge/Pinecone-Vector_DB-000000?style=for-the-badge)](https://pinecone.io)
-[![Groq](https://img.shields.io/badge/Groq-Inference-E55B3C?style=for-the-badge)](https://groq.com)
-[![LangChain](https://img.shields.io/badge/LangChain-Agents-1C3C3C?style=for-the-badge)](https://langchain.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![HuggingFace Spaces](https://img.shields.io/badge/%F0%9F%A4%97-Deploy%20Live-ffd21e?style=for-the-badge)](https://huggingface.co/spaces/Daniel2503/ella-medical)
+<br>
 
-[![Live Demo](https://img.shields.io/badge/TRY-ELLA_LIVE-6366f1?style=for-the-badge&logo=gradio&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
-[![GitHub](https://img.shields.io/badge/SOURCE-CODE-1e293b?style=for-the-badge&logo=github&logoColor=white)](https://github.com/DanielDeshmukh/ella)
+[![96% Accuracy](https://img.shields.io/badge/96%25_Accuracy-white?style=flat-square&labelColor=000000&color=000000&logo=checkmark&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
+[![90K Records](https://img.shields.io/badge/90K_Records-white?style=flat-square&labelColor=000000&color=000000&logo=database&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
+[![NVIDIA NIM](https://img.shields.io/badge/NVIDIA_NIM-white?style=flat-square&labelColor=000000&color=000000&logo=nvidia&logoColor=white)](https://build.nvidia.com)
+[![Pinecone](https://img.shields.io/badge/Pinecone-white?style=flat-square&labelColor=000000&color=000000&logo=pinecone&logoColor=white)](https://pinecone.io)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-white?style=flat-square&labelColor=000000&color=000000&logo=gradio&logoColor=white)](https://huggingface.co/spaces/Daniel2503/ella-medical)
+[![GitHub](https://img.shields.io/badge/Source_Code-white?style=flat-square&labelColor=000000&color=000000&logo=github&logoColor=white)](https://github.com/DanielDeshmukh/ella)
+[![License](https://img.shields.io/badge/MIT_License-white?style=flat-square&labelColor=000000&color=000000&logo=open-source-initiative&logoColor=white)](https://opensource.org/licenses/MIT)
+
+<br>
 
 **Ella is a production-grade Retrieval-Augmented Generation (RAG) system purpose-built for medical triage.**  
 She ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them in Pinecone, and retrieves context-grounded answers through a multi-stage pipeline — eliminating hallucinations in healthcare workflows.
-
-**96% Intent Accuracy** on 50 curated clinical queries • **90,306** medical records • **Live on HuggingFace**
 
 [Key Features](#key-features) •
 [Architecture](#architecture) •
 [Live Demo](#live-demo) •
 [Benchmark](#benchmark) •
-[How It Works](#how-it-works) •
-[CLI](#cli)
+[How It Works](#how-it-works)
 
 </div>
 
