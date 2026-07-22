@@ -1,49 +1,230 @@
 > ⭐ If Ella's RAG-based medical triage architecture gave you ideas — a star helps other health-AI builders find it. Takes 2 seconds.
 
-# Ella: Agentic Core for Qure
+<div align="center">
 
-Ella is a high-performance medical orchestration engine designed to bridge the gap between patient inquiries and clinical action. Operating as a sophisticated Reasoning and Extraction (RAG) agent, Ella processes unstructured natural language to perform clinical triage, intent classification, and medical knowledge retrieval.
+# ELLA
 
-## System Architecture and Operational Logic
+### Medical Triage & Clinical RAG Engine
 
-The core of Ella operates on a multi-stage pipeline designed to ensure clinical safety, contextual grounding, and logical reasoning. Unlike standard conversational AI, Ella utilizes a "Hard-RAG" protocol, which constrains the generative capabilities of the model to a curated set of medical handbooks.
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![NVIDIA NIM](https://img.shields.io/badge/NVIDIA_NIM-Embeddings-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://build.nvidia.com)
+[![Pinecone](https://img.shields.io/badge/Pinecone-Vector_DB-000000?style=for-the-badge)](https://pinecone.io)
+[![Groq](https://img.shields.io/badge/Groq-Inference-E55B3C?style=for-the-badge)](https://groq.com)
+[![LangChain](https://img.shields.io/badge/LangChain-Agents-1C3C3C?style=for-the-badge)](https://langchain.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-### 1. Intent Routing and State Awareness
-Upon receiving patient input, the system utilizes a State-Aware Router. This component analyzes the current message alongside the conversation history using Pydantic-validated schemas. The router classifies the input into four distinct streams:
-- **Emergency:** High-priority detection of life-threatening symptoms.
-- **Triage:** Clinical investigation of symptoms using medical data.
-- **Booking:** Administrative coordination for appointment scheduling.
-- **General Info:** Routine inquiries or emotional support.
+**Ella is a production-grade Retrieval-Augmented Generation (RAG) system purpose-built for medical triage.**  
+It ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores them in Pinecone, and retrieves context-grounded answers through a multi-stage pipeline — eliminating hallucinations in healthcare workflows.
 
-### 2. Hybrid Retrieval-Augmented Generation (RAG)
-Ella’s "brain" is powered by a high-density vector database containing over 90,000 clinical records. The retrieval process is two-fold:
-- **Semantic Search:** Utilizing vector embeddings to understand the underlying meaning of a patient's concern.
-- **Keyword Matching:** Ensuring specific medical terminology and drug names are captured with high precision.
-- **Reranking:** A Cross-Encoder model (BGE-Reranker) filters the top results to provide only the most relevant clinical context to the LLM, minimizing hallucinations.
+[Key Features](#key-features) •
+[Architecture](#architecture) •
+[Benchmark](#benchmark) •
+[Getting Started](#getting-started) •
+[Roadmap](#roadmap)
 
-### 3. Synthesis and Clinical Grounding
-The final response is generated through a constrained synthesis phase. Ella is instructed to integrate the retrieved clinical data into a professional, empathetic response. This phase ensures that every piece of medical advice is grounded in established medical texts, effectively acting as an "open-book" diagnostic aid.
-
----
-
-## Technical Progress Summary
-
-### Completed Development (Phases 1–8)
-The fundamental intelligence and data infrastructure of Ella are now fully operational. Key milestones achieved include:
-- **Core Infrastructure:** Establishment of a low-latency environment capable of toggling between local (Ollama) and cloud (Groq) inference.
-- **Data Engineering:** Implementation of an atomic data curation pipeline that cleaned and structured thousands of pages of medical text into machine-readable formats.
-- **Vector Intelligence:** Deployment of a Qdrant-based vector architecture and a hybrid retrieval system with integrated reranking for sub-second precision.
-- **Clinical Logic:** Development of an emergency guardrail system and diagnostic reasoning logic that allows Ella to perform multi-turn triage without losing clinical context.
+</div>
 
 ---
 
-## Future Roadmap: Upcoming Updates
+## Key Features
 
-### Phase 9–12: Relational Orchestration and Memory
-The next stage of development focuses on persistent data and advanced state management. This includes the integration of a PostgreSQL/Supabase backend to manage clinic schedules and patient records, alongside the implementation of `WindowBufferMemory` for enhanced long-term conversation retention.
+- **90,000+ Clinical Chunks** — Ingested from medical handbooks, symptom guides, and pharmacology references
+- **NVIDIA NIM Embeddings** — `nvidia/nv-embedqa-e5-v5` (1024-dim) via OpenAI-compatible API for semantic search
+- **Pinecone Vector DB** — Serverless cloud storage with cosine similarity for instant retrieval
+- **Hybrid Search** — Semantic (NIM) + BM25 keyword matching + CrossEncoder reranking
+- **5-Class Intent Router** — Emergency, Triage, Booking, General Info, Closing — validated via Pydantic schemas
+- **76% Intent Accuracy** — Benchmark-validated on 50 curated clinical queries
+- **Guardrail System** — Emergency detection prevents life-threatening cases from being misrouted
+- **Multi-Turn State Awareness** — Conversation history maintained across triage sessions
 
-### Phase 13–16: Telephony and Real-Time Voice
-To transition from a CLI to a functional receptionist, Ella will be integrated with telephony bridges (Vapi/Twilio). This phase will optimize Speech-to-Text (STT) and Text-to-Speech (TTS) pipelines (using Whisper and ElevenLabs) to achieve a "Time to First Byte" latency of under 1.5 seconds.
+---
 
-### Phase 17–20: Production Scaling and Compliance
-The final roadmap involves outbound notification systems via WhatsApp/SMS, the creation of a React-based administrative dashboard for human-in-the-loop oversight, and rigorous security hardening to ensure architectural compliance with international medical data privacy standards.
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        PATIENT INPUT                                │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  INTENT ROUTER (Groq llama-3.1-8b-instant + Pydantic Schema)      │
+│  Classifies: EMERGENCY │ TRIAGE │ BOOKING │ GENERAL_INFO │ CLOSING │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+      ┌──────────┐  ┌──────────────┐  ┌──────────┐
+      │ EMERGENCY │  │    TRIAGE    │  │ BOOKING  │
+      │ GUARDRAIL │  │  RAG SEARCH  │  │ HANDLER  │
+      └──────────┘  └──────┬───────┘  └──────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    RETRIEVAL PIPELINE                               │
+│                                                                     │
+│  ┌─────────────┐   ┌─────────────┐   ┌─────────────────────────┐  │
+│  │  NVIDIA NIM  │   │   BM25      │   │  CrossEncoder Reranker  │  │
+│  │  Embeddings  │ + │  Keyword    │ → │  ms-marco-MiniLM-L-6   │  │
+│  │  (Semantic)  │   │  Matching   │   │  (Top-10 → Top-3)      │  │
+│  └──────┬──────┘   └──────┬──────┘   └───────────┬─────────────┘  │
+│         │                 │                      │                  │
+│         ▼                 ▼                      ▼                  │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │              PINECONE VECTOR DATABASE                       │   │
+│  │         90,306 vectors • cosine • 1024 dimensions           │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  SYNTHESIS (Groq llama-3.1-8b-instant)                             │
+│  Grounded response + clinical justification + source attribution    │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                       PATIENT RESPONSE                              │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Benchmark
+
+Evaluation on 50 curated clinical queries (20 Triage, 10 Emergency, 10 Booking, 5 General Info, 5 Closing):
+
+| Metric | Value |
+|--------|-------|
+| **Intent Accuracy** | 76.0% |
+| **Avg Latency** | 8.95s |
+| **Avg Retrieval Score** | 0.92 |
+| **Records in DB** | 90,306 |
+
+### Intent Breakdown
+
+| Intent | Correct | Total | Accuracy |
+|--------|---------|-------|----------|
+| EMERGENCY | 9 | 10 | 90% |
+| TRIAGE | 12 | 20 | 60% |
+| BOOKING | 8 | 10 | 80% |
+| GENERAL_INFO | 5 | 5 | 100% |
+| CLOSING | 4 | 5 | 80% |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.11+
+- [NVIDIA API Key](https://build.nvidia.com) (free tier available)
+- [Pinecone API Key](https://pinecone.io)
+- [Groq API Key](https://groq.com)
+
+### Installation
+
+```bash
+git clone https://github.com/DanielDeshmukh/ella.git
+cd ella
+python -m venv venv
+venv\Scripts\activate        # Windows
+pip install -r requirements.txt
+```
+
+### Environment Setup
+
+Create a `.env` file:
+
+```env
+GROQ_API_KEY=gsk_xxxxx
+GROQ_MODEL=llama-3.1-8b-instant
+PINECONE_API_KEY=pcsk_xxxxx
+NVIDIA_API_KEY=nvapi_xxxxx
+```
+
+### Data Ingestion
+
+```bash
+# Ingest PDFs into Pinecone
+python -m src.engine.ingest
+
+# Or run migration from old ChromaDB
+python -m src.engine.migrate_chroma_to_pinecone
+```
+
+### Run Evaluation
+
+```bash
+python -m src.evaluation
+```
+
+### Start CLI
+
+```bash
+python -m src.main
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Embeddings** | NVIDIA NIM (`nv-embedqa-e5-v5`) | 1024-dim semantic vectors |
+| **Vector DB** | Pinecone (Serverless, AWS) | Cosine similarity search |
+| **LLM** | Groq (`llama-3.1-8b-instant`) | Intent classification + response generation |
+| **Reranker** | CrossEncoder (`ms-marco-MiniLM-L-6-v2`) | Precision reranking |
+| **Orchestration** | LangChain + LangGraph | Agent pipeline |
+| **Validation** | Pydantic | Schema-validated outputs |
+| **Data** | SQLite + PDFs | 90k clinical text chunks |
+
+---
+
+## Project Structure
+
+```
+ella/
+├── src/
+│   ├── agents/
+│   │   ├── router.py              # Intent classification (5-class)
+│   │   └── guardrails.py          # Emergency detection
+│   ├── engine/
+│   │   ├── retriever.py           # Pinecone + NIM hybrid search
+│   │   ├── nim_embeddings.py      # NVIDIA NIM API wrapper
+│   │   ├── bm25_retriever.py      # BM25 keyword retrieval
+│   │   ├── ingest.py              # PDF → Pinecone pipeline
+│   │   └── migrate_chroma_to_pinecone.py  # Batch migration
+│   ├── evaluation.py              # 50-query benchmark
+│   └── main.py                    # CLI entry point
+├── requirements.txt
+├── .env                           # API keys (gitignored)
+└── README.md
+```
+
+---
+
+## Roadmap
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| **1–8** | Core RAG, Vector DB, Hybrid Search, Guardrails | ✅ Complete |
+| **9–12** | PostgreSQL backend, Patient records, Memory | 🔜 Planned |
+| **13–16** | Voice (Vapi/Twilio), STT/TTS, <1.5s latency | 🔜 Planned |
+| **17–20** | WhatsApp/SMS, Admin dashboard, HIPAA compliance | 🔜 Planned |
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**Built with ❤️ for healthcare AI**
+
+[![Stars](https://img.shields.io/github/stars/DanielDeshmukh/ella?style=social)](https://github.com/DanielDeshmukh/ella)
+
+</div>
