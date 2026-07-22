@@ -24,8 +24,8 @@ She ingests 90,000+ clinical text chunks, embeds them via NVIDIA NIM, stores the
 [Key Features](#key-features) •
 [Architecture](#architecture) •
 [Live Demo](#live-demo) •
-[Benchmark](#benchmark) •
-[How It Works](#how-it-works)
+[Python SDK](#use-via-api) •
+[CLI](#cli)
 
 </div>
 
@@ -190,77 +190,71 @@ ella serve
 
 ## Use via API
 
-Ella exposes a REST API through HuggingFace Spaces. Three ways to connect:
+Ella is available as a Python SDK — just like OpenAI or Groq.
 
-### Python — `gradio_client`
+### Install
 
 ```bash
-pip install gradio_client
+pip install ella-medical
 ```
 
+### Quick Start
+
 ```python
-from gradio_client import Client
+from ella_medical import Ella
 
-client = Client("Daniel2503/ella-medical")
+client = Ella()
+response = client.query("What are the symptoms of a heart attack?")
 
-result = client.predict(
-    user_input="What are the symptoms of a heart attack?",
-    history="[]",
-    api_name="/process_query_gpu",
+print(response.intent)         # "TRIAGE"
+print(response.thought_process)
+print(response.response)       # Grounded clinical response
+print(response.retrieved_context)
+```
+
+### With Conversation History
+
+```python
+from ella_medical import Ella
+
+client = Ella()
+
+# First message
+r1 = client.query("I have chest pain")
+
+# Follow-up (pass history from previous response)
+r2 = client.query(
+    "What about treatment options?",
+    history=f"Patient: I have chest pain\nElla: {r1.response}"
 )
 
-print(result)
-# Returns: [history, intent, thought_process, context, ""]
+print(r2.response)
 ```
 
-### Python — `requests`
-
-```python
-import requests
-
-API_URL = "https://daniel2503-ella-medical.hf.space/api/predict"
-
-payload = {
-    "data": [
-        "What are the symptoms of a heart attack?",
-        []
-    ]
-}
-
-response = requests.post(API_URL, json=payload)
-print(response.json())
-```
-
-### cURL
-
-```bash
-curl -X POST https://daniel2503-ella-medical.hf.space/api/predict \
-  -H "Content-Type: application/json" \
-  -d '{"data": ["What are the symptoms of a heart attack?", []]}'
-```
-
-### Local API Server
+### Local Server
 
 ```bash
 # Start the FastAPI server
 ella serve
 
-# OpenAPI docs at http://localhost:8000/docs
-# Query endpoint: POST /query
+# Connect with custom base URL
+from ella_medical import Ella
+
+client = Ella(base_url="http://localhost:8000")
+response = client.query("What are the symptoms of a heart attack?")
 ```
 
+### Response Object
+
 ```python
-import requests
-
-response = requests.post("http://localhost:8000/query", json={
-    "query": "What are the symptoms of a heart attack?",
-    "history": ""
-})
-
-data = response.json()
-print(data["intent"])        # "TRIAGE"
-print(data["response"])     # Grounded clinical response
-print(data["justification"])
+@dataclass
+class QueryResponse:
+    intent: str            # EMERGENCY | TRIAGE | BOOKING | GENERAL_INFO | CLOSING
+    priority: str          # Priority level
+    thought_process: str   # Router's reasoning
+    justification: str     # Clinical justification
+    response: str          # Ella's response
+    retrieved_context: str # Retrieved medical documents
 ```
 
 ---
