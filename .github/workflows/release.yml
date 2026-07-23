@@ -43,6 +43,7 @@ jobs:
         run: twine upload dist/*
 
       - name: Deploy to HuggingFace Space
+        if: ${{ secrets.HF_TOKEN != '' }}
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
