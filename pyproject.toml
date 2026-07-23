@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ella-sdk"
-version = "1.2.3"
+version = "1.2.4"
 description = "Medical Triage & Clinical RAG Engine"
 readme = "README.md"
 license = {text = "MIT"}
@@ -56,7 +56,7 @@ ella = "src.cli:main"
 include = ["ella_medical*", "src*"]
 
 [tool.ruff]
-target-version = "py311"
+target-version = "1.2.4"
 line-length = 100
 
 [tool.ruff.lint]
