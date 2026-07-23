@@ -2,7 +2,8 @@ name: Release to PyPI + Deploy to HuggingFace
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "v*"
 
 jobs:
   release:
@@ -21,17 +22,19 @@ jobs:
       - name: Install dependencies
         run: pip install build twine huggingface_hub
 
-      - name: Bump version
-        id: bump
+      - name: Extract version from tag
+        id: version
         run: |
-          CURRENT=$(grep -oP 'version = "\K[^"]+' pyproject.toml)
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-          NEW_PATCH=$((PATCH + 1))
-          NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
-          sed -i "s/version = \"$CURRENT\"/version = \"$NEW_VERSION\"/" pyproject.toml
-          sed -i "s/__version__ = \"$CURRENT\"/__version__ = \"$NEW_VERSION\"/" ella_medical/__init__.py
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "Bumped $CURRENT → $NEW_VERSION"
+          TAG="${GITHUB_REF#refs/tags/v}"
+          echo "version=$TAG" >> $GITHUB_OUTPUT
+          echo "Tag version: $TAG"
+
+      - name: Update version in files
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          sed -i "s/version = \".*\"/version = \"$VERSION\"/" pyproject.toml
+          sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" ella_medical/__init__.py
+          echo "Updated to $VERSION"
 
       - name: Build
         run: python -m build
@@ -65,5 +68,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add pyproject.toml ella_medical/__init__.py
-          git commit -m "chore: bump version to ${{ steps.bump.outputs.version }}" || true
+          git commit -m "chore: release v${{ steps.version.outputs.version }}" || true
           git push
