@@ -1,4 +1,4 @@
-name: Release to PyPI
+name: Release to PyPI + Deploy to HuggingFace
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install build twine
+        run: pip install build twine huggingface_hub
 
       - name: Bump version
         id: bump
@@ -41,6 +41,23 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: twine upload dist/*
+
+      - name: Deploy to HuggingFace Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -c "
+          from huggingface_hub import HfApi
+          api = HfApi(token='$HF_TOKEN')
+          api.upload_file(
+              path_or_fileobj='app.py',
+              path_in_repo='app.py',
+              repo_id='Daniel2503/ella-medical',
+              repo_type='space',
+              commit_message='deploy: update app.py from CI'
+          )
+          print('Deployed to HuggingFace Space')
+          "
 
       - name: Commit version bump
         run: |
