@@ -4,10 +4,16 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 1.2.0)"
+        required: true
+        type: string
 
 jobs:
   release:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -23,19 +29,22 @@ jobs:
       - name: Install dependencies
         run: pip install build twine huggingface_hub
 
-      - name: Extract version from tag
+      - name: Determine version
         id: version
         run: |
-          TAG="${GITHUB_REF#refs/tags/v}"
-          echo "version=$TAG" >> $GITHUB_OUTPUT
-          echo "Tag version: $TAG"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
 
       - name: Update version in files
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           sed -i "s/version = \".*\"/version = \"$VERSION\"/" pyproject.toml
           sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" ella_medical/__init__.py
-          echo "Updated to $VERSION"
 
       - name: Build
         run: python -m build
@@ -64,10 +73,23 @@ jobs:
           print('Deployed to HuggingFace Space')
           "
 
-      - name: Commit version bump
+      - name: Commit version + create tag
+        if: github.event_name == 'workflow_dispatch'
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add pyproject.toml ella_medical/__init__.py
-          git commit -m "chore: release v${{ steps.version.outputs.version }}" || true
+          git commit -m "chore: release v$VERSION" || true
+          git tag "v$VERSION"
+          git push && git push origin "v$VERSION"
+
+      - name: Commit version bump
+        if: github.event_name == 'push'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add pyproject.toml ella_medical/__init__.py
+          git commit -m "chore: release v$VERSION" || true
           git push
