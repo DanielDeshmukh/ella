@@ -23,50 +23,52 @@ class QueryResponse:
     def show(self):
         """Pretty-print the full response."""
         W = 60
-        sep = "\033[38;2;42;51;64m" + "\u2500" * W + "\033[0m"
-        dim = "\033[2m"
+        sep = "-" * W
         bold = "\033[1m"
         reset = "\033[0m"
-        cyan = "\033[38;2;45;212;191m"
-        white = "\033[38;2;232;236;241m"
-        gray = "\033[38;2;137;147;164m"
-        dimgray = "\033[38;2;75;85;99m"
+        cyan = "\033[36m"
+        white = "\033[97m"
+        dimgray = "\033[90m"
 
-        # Intent badge
-        icons = {"EMERGENCY": "\u26a0", "TRIAGE": "\u25b2", "BOOKING": "\u25c6", "GENERAL_INFO": "\u2139", "CLOSING": "\u2716"}
-        icon = icons.get(self.intent, "\u25cf")
-        badge = f"{cyan}{bold} {icon} {self.intent}{reset}"
+        icons = {
+            "EMERGENCY": "!",
+            "TRIAGE": "^",
+            "BOOKING": "*",
+            "GENERAL_INFO": "i",
+            "CLOSING": "x",
+        }
+        icon = icons.get(self.intent, "o")
+        badge = cyan + bold + " [" + icon + "] " + self.intent + reset
         if self.priority:
-            badge += f" {dimgray}{self.priority}{reset}"
+            badge += " " + dimgray + self.priority + reset
 
-        print(f"\n{sep}")
-        print(f" {badge}")
-        print(f"{sep}\n")
+        print()
+        print(sep)
+        print(" " + badge)
+        print(sep)
+        print()
 
-        # Response text with proper wrapping
-        for line in self.response.split("\n"):
-            line = line.strip()
-            if not line:
+        for text_line in self.response.split("\n"):
+            text_line = text_line.strip()
+            if not text_line:
                 print()
                 continue
-            if line.startswith("- ") or line.startswith("\u2022"):
-                print(f"  {cyan}\u25cf{reset}  {white}{line[2:]}{reset}")
+            if text_line.startswith("- ") or text_line.startswith("* "):
+                print("  " + cyan + "*" + reset + "  " + white + text_line[2:] + reset)
             else:
-                print(f"  {white}{line}{reset}")
+                print("  " + white + text_line + reset)
 
-        # Sources
         if self.retrieved_context and self.retrieved_context.strip():
-        print(f"\n{sep}")
-        print(f" {dimgray}{bold}Sources{reset}")
-        rule = "\u2500" * W
-        print(f"{dimgray}{rule}{reset}")
-            for line in self.retrieved_context.strip().split("\n")[:3]:
-                line = line.strip()
-                if line.startswith("[Source:"):
-                    print(f"  {dimgray}{line}{reset}")
-                elif line:
-                    # Truncate long lines
-                    display = line[:80] + "..." if len(line) > 80 else line
-                    print(f"  {dimgray}{display}{reset}")
+            print()
+            print(sep)
+            print(" " + dimgray + bold + "Sources" + reset)
+            print(dimgray + sep + reset)
+            for src_line in self.retrieved_context.strip().split("\n")[:3]:
+                src_line = src_line.strip()
+                if src_line:
+                    display = src_line[:80] + "..." if len(src_line) > 80 else src_line
+                    print("  " + dimgray + display + reset)
 
-        print(f"\n{sep}\n")
+        print()
+        print(sep)
+        print()
