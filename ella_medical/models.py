@@ -56,9 +56,10 @@ class QueryResponse:
 
         # Sources
         if self.retrieved_context and self.retrieved_context.strip():
-            print(f"\n{sep}")
-            print(f" {dimgray}{bold}Sources{reset}")
-            print(f"{dimgray}{\u2500 * W}{reset}")
+        print(f"\n{sep}")
+        print(f" {dimgray}{bold}Sources{reset}")
+        rule = "\u2500" * W
+        print(f"{dimgray}{rule}{reset}")
             for line in self.retrieved_context.strip().split("\n")[:3]:
                 line = line.strip()
                 if line.startswith("[Source:"):
