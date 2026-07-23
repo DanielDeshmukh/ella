@@ -47,8 +47,26 @@ from ella_medical import Ella
 client = Ella()
 response = client.query("What are the symptoms of a heart attack?")
 
-print(response.intent)         # "TRIAGE"
-print(response.response)       # Grounded clinical response
+response.show()
+```
+
+**Output:**
+```
+------------------------------------------------------------
+ [^] TRIAGE P2
+------------------------------------------------------------
+
+  Chest pain, shortness of breath, and fatigue are common...
+
+  *  Chest pain or discomfort
+  *  Numbness or tingling in the arms, back, neck, jaw
+  *  Shortness of breath
+
+------------------------------------------------------------
+ Sources
+------------------------------------------------------------
+  [Source: Medical Handbook.pdf]: ...
+------------------------------------------------------------
 ```
 
 ---
@@ -64,29 +82,19 @@ client = Ella()
 response = client.query("What are the symptoms of a heart attack?")
 
 print(response.intent)              # "TRIAGE"
-print(response.priority)            # Priority level
-print(response.thought_process)     # Router's reasoning
-print(response.response)            # Ella's response
+print(response.priority)            # "P2"
+print(response.response)            # Ella's clinical response
 print(response.retrieved_context)   # Retrieved medical documents
 ```
 
-### Multi-Turn Conversation
+### Pretty Print
 
 ```python
 from ella_medical import Ella
 
 client = Ella()
-
-# First message
-r1 = client.query("I have chest pain")
-
-# Follow-up
-r2 = client.query(
-    "What about treatment options?",
-    history=f"Patient: I have chest pain\nElla: {r1.response}"
-)
-
-print(r2.response)
+response = client.query("What are the symptoms of a heart attack?")
+response.show()  # Formatted output with intent badge, response, and sources
 ```
 
 ### Context Manager
@@ -96,7 +104,7 @@ from ella_medical import Ella
 
 with Ella() as client:
     response = client.query("What are the symptoms of diabetes?")
-    print(response.response)
+    response.show()
 ```
 
 ### Response Object
@@ -105,7 +113,7 @@ with Ella() as client:
 @dataclass
 class QueryResponse:
     intent: str            # EMERGENCY | TRIAGE | BOOKING | GENERAL_INFO | CLOSING
-    priority: str          # Priority level
+    priority: str          # P1 | P2 | P3
     thought_process: str   # Router's reasoning
     justification: str     # Clinical justification
     response: str          # Ella's response
